@@ -1,0 +1,7 @@
+{
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": true,
+    "python.linting.pylintPath": "${workspacefolder}\\venv\\Scripts\\pylint.exe",
+    "python.linting.pylamaEnabled": true,
+    "python.pythonPath": "C:\\Users\\NCRS\\AppData\\Local\\Programs\\Python\\Python39\\python.exe"
+}
