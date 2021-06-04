@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Comment, Post, Like, Share, Image, CommentVote, PostVote
 from rest_framework.validators import UniqueValidator
+from user.models import User
 
 
 class CommentVoteSerializer(serializers.ModelSerializer):
@@ -42,11 +43,15 @@ class PostVoteSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    comments = CommentSerializer(many=True, read_only=True)
-    likes = LikeSerializer(many=True, read_only=True)
-    votes = PostVoteSerializer(many=True, read_only=True)
-    images = ImageSerializer(many=True, read_only=True)
+    comments = CommentSerializer(many=True)
+    likes = LikeSerializer(many=True)
+    votes = PostVoteSerializer(many=True)
+    images = ImageSerializer(many=True)
 
     class Meta:
         model = Post
         fields = "__all__"
+
+    def create(self, validated_data):
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
