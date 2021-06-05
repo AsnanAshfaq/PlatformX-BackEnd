@@ -123,3 +123,33 @@ class Follower(models.Model):
     followed_id = models.ForeignKey(User, related_name='followed_id', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class ProfileImage(models.Model):
+    def get_image_path_and_filename(self, filename):
+        return "user_images" + "/profile_images/" + str(self.id) + "/" + str(filename)
+
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="user_profile_image", null=False)
+    metadata = models.CharField(max_length=30, default="", null=True, blank=True)
+    path = models.ImageField(upload_to=get_image_path_and_filename, default="", )
+
+    def __str__(self):
+        return str(self.metadata)
+
+
+class BackgroundImage(models.Model):
+    def get_image_path_and_filename(self, filename):
+        return "user_images" + "/background_images/" + str(self.id) + "/" + str(filename)
+
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="user_background_image", null=False)
+    metadata = models.CharField(max_length=30, default="", null=True, blank=True)
+    path = models.ImageField(upload_to=get_image_path_and_filename, default="", )
+
+    def __str__(self):
+        return str(self.metadata)

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from .serializer import (CommentSerializer, PostSerializer, ImageSerializer)
+from user.serializer import UserSerializer
 from .models import Comment, Post, Image
 from rest_framework import (viewsets, permissions, generics, status)
 from rest_framework.response import Response
@@ -18,7 +19,7 @@ from user.models import User
 
 # Create your views here.
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def create_post(request):
     try:
         response = {}
@@ -46,7 +47,11 @@ def get_posts(request):
         # result_page = paginator.paginate_queryset(post, request)
         # print(post)
         serializer = PostSerializer(post, many=True)
-        # print(serializer.data)
+        # print(serializer.data[0].user)
+        # user_uuid = serializer.data[0]["user"]
+        # user = User.objects.get(id=user_uuid)
+        # user_serializer = UserSerializer(user)
+        # print(user_serializer.data)
         # return paginator.get_paginated_response(serializer.data)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
