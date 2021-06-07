@@ -9,30 +9,40 @@ from rest_framework.decorators import (api_view, permission_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework import status
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
+
 from rest_framework.pagination import PageNumberPagination
 from user.models import User
 
 
-# Create your views here.
+# Create post
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
+@parser_classes([FormParser, MultiPartParser])
 def create_post(request):
     try:
         response = {}
-
-        serializer = PostSerializer(data=request.data, context={'request': request})
+        print(request.data)
+        serializer = PostSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-            # print(serializer.is_valid(raise_exception=True))
-            serializer.save()
+            post = serializer.save()
+            print("Serializer is valid")
+            if request.data['path']:  # check if request has path attribute
+                image = Image.objects.create(post=post, metadata=request.data['metadata'], path=request.data['path'])
+                print(image)
+            else:
+                print("Request has no attribute of path")
             response["success"] = "Post has been created"
-            return Response(data=response, status=status.HTTP_201_CREATED)
-
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+        print(serializer.errors)
+        response["error"] = "Post can not be created"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except (PermissionDenied, APIException, KeyError) as e:
-        response["error"] = "Post has not been created"
+        response["error"] = "Post can not be created"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 

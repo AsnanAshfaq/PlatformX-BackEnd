@@ -55,6 +55,15 @@ class ImageSerializer(serializers.ModelSerializer):
         model = Image
         fields = "__all__"
 
+    # def create(self, validated_data):
+    #     print("Calling from image serializer")
+    #     print("Validated data is")
+    #     print(validated_data)
+    #     # print(validated_data)
+    #     # validated_data['post'] = self.context['post']
+    #     image = Image.objects.create(**validated_data)
+    #     return image
+
 
 class PostVoteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -71,11 +80,11 @@ class PostUserSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
-    comments = CommentSerializer(many=True)
-    likes = LikeSerializer(many=True)
-    votes = PostVoteSerializer(many=True)
-    images = ImageSerializer(many=True)
-    user = PostUserSerializer(required=False)
+    comments = CommentSerializer(many=True, required=False)  # required=False
+    likes = LikeSerializer(many=True, required=False)  # required=False
+    votes = PostVoteSerializer(many=True, required=False)  # required=False
+    images = ImageSerializer(many=True, required=False)  # required=False
+    user = PostUserSerializer(required=False)  # required=False
 
     class Meta:
         model = Post
@@ -83,4 +92,5 @@ class PostSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data["user"] = self.context["request"].user
-        return super().create(validated_data)
+        post = Post.objects.create(**validated_data)
+        return post
