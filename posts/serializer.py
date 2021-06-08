@@ -20,12 +20,18 @@ class CommentUserSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    votes = CommentVoteSerializer(many=True, read_only=True)
+    votes = CommentVoteSerializer(many=True,required=False)
     user = CommentUserSerializer(required=False)
 
     class Meta:
         model = Comment
-        exclude = ['post']
+        # exclude = ['post']
+        fields = '__all__'
+    def create(self, validated_data):
+        validated_data['user'] = self.context["request"].user
+        validated_data['text'] = self.data['text']
+        comment = Comment.objects.create(**validated_data)
+        return comment
 
 
 class LikeUserSerializer(serializers.ModelSerializer):
@@ -88,7 +94,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'votes', 'text', 'likes', 'images', 'comments', 'user']
+        fields = '__all__'
 
     def create(self, validated_data):
         validated_data["user"] = self.context["request"].user

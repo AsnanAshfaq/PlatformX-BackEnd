@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from .serializer import (CommentSerializer, PostSerializer, ImageSerializer)
+from .serializer import (PostSerializer, CommentSerializer, ImageSerializer)
 from user.serializer import UserSerializer
 from .models import Comment, Post, Image
 from rest_framework import (viewsets, permissions, generics, status)
+from rest_framework.serializers import ModelSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import (api_view, permission_classes)
 from rest_framework.permissions import IsAuthenticated
@@ -21,19 +22,20 @@ from user.models import User
 
 # Create post
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 @parser_classes([FormParser, MultiPartParser])
 def create_post(request):
     try:
         response = {}
         print(request.data)
+        # return Response(data="Received data", status=status.HTTP_200_OK)
         serializer = PostSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             post = serializer.save()
-            print("Serializer is valid")
+            print("Post Serializer is valid")
             if request.data['path']:  # check if request has path attribute
+                # loop through all of the images
                 image = Image.objects.create(post=post, metadata=request.data['metadata'], path=request.data['path'])
-                print(image)
             else:
                 print("Request has no attribute of path")
             response["success"] = "Post has been created"
@@ -70,16 +72,33 @@ def get_posts(request):
         return Response(data=response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class CommentViewSet(generics.ListAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-
 class ImagesViewSet(generics.ListAPIView):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
 
-# @api_view(['POST'])
-# def create_post(request):
-#     print(request)
-#     return Response("This is the response")
+
+@api_view(['POST'])
+def create_comment(request):
+    response = {}
+    comment_serializer = CommentSerializer(data=request.data, context={"request": request})
+    if comment_serializer.is_valid():
+        print("Comment Serializer is valid")
+        comment_serializer.save()
+        response["success"] = "Comment has been created"
+        return Response(data=response, status=status.HTTP_201_CREATED)
+    else:
+        response["success"] = "Error while posting comment"
+        return Response(data=response, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+def get_comments(request, id):
+    response = {}
+    try:
+        comment = Comment.objects.filter(post=id)
+        comment_serializer = CommentSerializer(comment, many=True)
+        response["success"] = "Comments found"
+        return Response(data=comment_serializer.data, status=status.HTTP_200_OK)
+    except Comment.DoesNotExist:
+        response["error"] = "Error while fetching comments"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)

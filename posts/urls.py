@@ -1,16 +1,11 @@
 from django.urls import include, path
 from rest_framework import routers
-from .views import get_posts, create_post, CommentViewSet, ImagesViewSet
+from .views import get_posts, create_post, ImagesViewSet, create_comment, get_comments
 from rest_framework.authtoken import views
 
 urlpatterns = [
-    path('post/', get_posts),
+    path('post/<uuid:id>/comment/', get_comments),
+    path('post/comment/create', create_comment),
     path('post/create/', create_post),
-    path('post/comments/', CommentViewSet.as_view()),
-    path('post/images/', ImagesViewSet.as_view())
+    path('post/', get_posts),
 ]
-
-# create   -- post
-# read     -- get
-# update   -- post
-# delete   -- post
