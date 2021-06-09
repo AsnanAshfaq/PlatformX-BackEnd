@@ -61,14 +61,14 @@ class ImageSerializer(serializers.ModelSerializer):
         model = Image
         fields = "__all__"
 
-    # def create(self, validated_data):
-    #     print("Calling from image serializer")
-    #     print("Validated data is")
-    #     print(validated_data)
-    #     # print(validated_data)
-    #     # validated_data['post'] = self.context['post']
-    #     image = Image.objects.create(**validated_data)
-    #     return image
+    def create(self, validated_data):
+        print("Calling from image serializer")
+        print("Validated data is")
+        print(validated_data)
+        # print(validated_data)
+        # validated_data['post'] = self.context['post']
+        image = Image.objects.create(**validated_data)
+        return image
 
 
 class PostVoteSerializer(serializers.ModelSerializer):

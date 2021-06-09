@@ -35,11 +35,20 @@ def create_post(request):
             print("Post Serializer is valid")
             if request.data['path']:  # check if request has path attribute
                 # loop through all of the images
-                image = Image.objects.create(post=post, metadata=request.data['metadata'], path=request.data['path'])
+
+                request.data['post'] = post.id
+                # convert queryDict into PythonDict
+                dictionary = dict(request.data)
+                path = dictionary['path']
+                metadata = dictionary['metadata']
+                # loop through all the images from request and save them
+                for index, path in enumerate(path):
+                    image = Image.objects.create(post=post, metadata=metadata[index], path=path)
+
             else:
                 print("Request has no attribute of path")
             response["success"] = "Post has been created"
-            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+            return Response(data=response, status=status.HTTP_201_CREATED)
         print(serializer.errors)
         response["error"] = "Post can not be created"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
