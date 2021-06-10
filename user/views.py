@@ -1,50 +1,35 @@
-from django.shortcuts import render
-from rest_framework import (viewsets, permissions, generics, status)
 from .models import User, Student
-from .serializer import UserSerializer, StudentSerializer
+from .serializer import UserSerializer, StudentSerializer, Users
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 
 
-# Create your views here.
-
-class UserViewSet(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class StudentViewSet(generics.ListAPIView):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
-
+# Create your views here
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def list_user(request):
+def get_user(request):
+    response = {}
     try:
-        print("trying to get")
+        user = User.objects.get(email=request.user)
+        user_serializer = UserSerializer(user)
+        return Response(data=user_serializer.data, status=status.HTTP_200_OK)
+
+    except User.DoesNotExist:
+        response["error"] = "No such user exist"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def get_all_users(request):
+    response = {}
+    try:
         user = User.objects.all()
-        serializer = UserSerializer(data=user)
-        if serializer.is_valid():
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    except User.DoesNotExist:
-        print("excepting")
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_user(request, id):
-    try:
-        print("trying to get")
-        user = User.objects.get(id="8d86d889-ae08-4d4d-bb6b-e39af80c5590")
-        serializer = UserSerializer(data=user)
-        if serializer.is_valid():
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    except User.DoesNotExist:
-        print("excepting")
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        user_serializer = Users(user, many=True)
+        return Response(data=user_serializer.data, status=status.HTTP_200_OK)
+    except:
+        response['error'] = "Error occured"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)

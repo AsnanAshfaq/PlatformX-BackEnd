@@ -44,7 +44,6 @@ def create_post(request):
                 # loop through all the images from request and save them
                 for index, path in enumerate(path):
                     image = Image.objects.create(post=post, metadata=metadata[index], path=path)
-
             else:
                 print("Request has no attribute of path")
             response["success"] = "Post has been created"
