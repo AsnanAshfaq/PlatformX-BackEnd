@@ -22,7 +22,7 @@ from user.models import User
 
 # Create post
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 @parser_classes([FormParser, MultiPartParser])
 def create_post(request):
     try:
@@ -56,9 +56,10 @@ def create_post(request):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
+# get all the posts from the database
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
-def get_posts(request):
+@permission_classes([IsAuthenticated])
+def get_all_posts(request):
     try:
         response = {}
         # paginator = PageNumberPagination()
@@ -78,6 +79,22 @@ def get_posts(request):
     except AttributeError:
         response["error"] = "Error occured while gettings posts"
         return Response(data=response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# get posts of a single user
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_posts(request):
+    response = {}
+    post_serializer = ""
+    try:
+        post = Post.objects.filter(user=request.user)
+        post_serializer = PostSerializer(post, many=True)
+        return Response(data=post_serializer.data, status=status.HTTP_200_OK)
+    except:
+        response["error"] = "Error occured while gettings posts"
+        print(post_serializer)
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
 class ImagesViewSet(generics.ListAPIView):

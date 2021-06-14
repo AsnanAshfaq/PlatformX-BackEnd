@@ -23,7 +23,7 @@ def get_user(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsAuthenticated])
 def get_all_users(request):
     response = {}
     try:

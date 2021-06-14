@@ -1,3 +1,4 @@
+from jinja2.nodes import Pos
 from rest_framework import serializers
 from .models import User, Student, Organization, Follower, BackgroundImage, ProfileImage
 from collections import OrderedDict
