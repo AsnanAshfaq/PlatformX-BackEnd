@@ -58,7 +58,7 @@ def create_post(request):
 
 # get all the posts from the database
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_all_posts(request):
     try:
         response = {}

@@ -9,7 +9,7 @@ class Post(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(
-        'user.User', on_delete=models.CASCADE,related_name="post", default=1)
+        'user.User', on_delete=models.CASCADE, related_name="post", default=1)
     text = models.TextField(max_length=1000, null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

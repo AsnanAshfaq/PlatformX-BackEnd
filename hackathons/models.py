@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
+from django.core.mail import send_mail
 
 
 # Create your models here.
@@ -12,14 +13,14 @@ class Hackathon(models.Model):
         ('DRAFT', 'DRAFT')
     ]
 
-    def get_thumbnail_image_path(self):
-        return "hackathon" + "/" + self.id + "/" + "thumbnail" + "/" + str(self.title)
+    def get_thumbnail_image_path(self, filename):
+        return "hackathon" + "/" + str(self.id) + "/" + "thumbnail" + "/" + str(self.title) + "-" + str(filename)
 
-    def get_background_image_path(self):
-        return "hackathon" + "/" + self.id + "/" + "background" + "/" + str(self.title)
+    def get_background_image_path(self, filename):
+        return "hackathon" + "/" + str(self.id) + "/" + "background" + "/" + str(self.title) + "-" + str(filename)
 
-    def get_logo_image_path(self):
-        return "hackathon" + "/" + self.id + "/" + "logo" + "/" + str(self.title)
+    def get_logo_image_path(self, filename):
+        return "hackathon" + "/" + str(self.id) + "/" + "logo" + "/" + str(self.title) + "-" + str(filename)
 
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -61,7 +62,7 @@ class Prize(models.Model):
     title = models.CharField(max_length=25)
     value = models.IntegerField()
     no_of_winning_projects = models.IntegerField()
-    description = models.TextField()
+    description = models.TextField(default='')
 
 
 class Criteria(models.Model):
@@ -74,8 +75,8 @@ class Criteria(models.Model):
 
 class Sponsor(models.Model):
 
-    def get_image_path(self):
-        return "hackathon" + "/" + self.id + "/" + "sponsors" + "/" + str(self.name)
+    def get_image_path(self, filename):
+        return "hackathon" + "/" + str(self.id) + "/" + "sponsors" + "/" + str(self.name) + "-" + str(filename)
 
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -87,8 +88,8 @@ class Sponsor(models.Model):
 
 class Judge(models.Model):
 
-    def get_image_path(self):
-        return "hackathon" + "/" + self.id + "/" + "judges" + "/" + str(self.name)
+    def get_image_path(self, filename):
+        return "hackathon" + "/" + str(self.id) + "/" + "judges" + "/" + str(self.name) + "-" + str(filename)
 
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
