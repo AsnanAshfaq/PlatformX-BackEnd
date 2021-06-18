@@ -14,7 +14,7 @@ def get_all_hackathons(request):
     response = {}
     hackathon_serializer = ""
     try:
-        hackathon = Hackathon.objects.all()
+        hackathon = Hackathon.objects.all().order_by('-created_at')
         hackathon_serializer = HackathonSerializer(hackathon, many=True)
         return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
     except:

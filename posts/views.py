@@ -58,16 +58,15 @@ def create_post(request):
 
 # get all the posts from the database
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_all_posts(request):
     try:
         response = {}
         # paginator = PageNumberPagination()
         # paginator.page_size = 2
-        post = Post.objects.all()
+        post = Post.objects.all().order_by('-created_at')
         # result_page = paginator.paginate_queryset(post, request)
-        # print(post)
-        serializer = PostSerializer(post, many=True)
+        serializer = PostSerializer(post, many=True, context={"request": request})
         # print(serializer.data[0].user)
         # user_uuid = serializer.data[0]["user"]
         # user = User.objects.get(id=user_uuid)
@@ -88,7 +87,7 @@ def get_user_posts(request):
     response = {}
     post_serializer = ""
     try:
-        post = Post.objects.filter(user=request.user)
+        post = Post.objects.filter(user=request.user).order_by('-created_at')
         post_serializer = PostSerializer(post, many=True)
         return Response(data=post_serializer.data, status=status.HTTP_200_OK)
     except:

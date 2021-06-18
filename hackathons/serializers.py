@@ -49,11 +49,11 @@ class HackathonUserSerializer(ModelSerializer):
 
 
 class OrganizationSerializer(ModelSerializer):
-    organization = HackathonUserSerializer(source='uuid')
+    user = HackathonUserSerializer(source='uuid')
 
     class Meta:
         model = Organization
-        fields = ['organization']
+        fields = ['uuid', 'name', 'location', 'user']
 
 
 class HackathonSerializer(ModelSerializer):
@@ -61,7 +61,7 @@ class HackathonSerializer(ModelSerializer):
     judges = JudgeSerializer(many=True)
     prizes = PrizeSerializer(many=True)
     criteria = CriteriaSerializer(many=True)
-    user = OrganizationSerializer(required=False)
+    organization = OrganizationSerializer(required=False, source='user')
 
     class Meta:
         model = Hackathon

@@ -20,13 +20,14 @@ class CommentUserSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    votes = CommentVoteSerializer(many=True,required=False)
+    votes = CommentVoteSerializer(many=True, required=False)
     user = CommentUserSerializer(required=False)
 
     class Meta:
         model = Comment
         # exclude = ['post']
         fields = '__all__'
+
     def create(self, validated_data):
         validated_data['user'] = self.context["request"].user
         validated_data['text'] = self.data['text']
@@ -91,6 +92,7 @@ class PostSerializer(serializers.ModelSerializer):
     votes = PostVoteSerializer(many=True, required=False)  # required=False
     images = ImageSerializer(many=True, required=False)  # required=False
     user = PostUserSerializer(required=False)  # required=False
+    is_editable = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -100,3 +102,13 @@ class PostSerializer(serializers.ModelSerializer):
         validated_data["user"] = self.context["request"].user
         post = Post.objects.create(**validated_data)
         return post
+
+    def get_is_editable(self, obj):
+        # if the user loged in has made this post
+        # then enable the editing option
+        user = UserSerializer(self.context['request'].user)
+        # print("User who posted this post has id" + str(obj.user.id))
+        # print("Logged in user has id" + str(user.data['id']))
+        if (str(obj.user.id) == str(user.data['id'])):
+            return True
+        return False

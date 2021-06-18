@@ -106,6 +106,7 @@ class Student(models.Model):
 
 class Organization(models.Model):
     uuid = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="organization")
+    name = models.TextField(max_length=50,default='')
     reg_no = models.IntegerField()
     location = models.CharField(max_length=80)
 
