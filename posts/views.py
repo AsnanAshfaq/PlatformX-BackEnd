@@ -88,7 +88,7 @@ def get_user_posts(request):
     post_serializer = ""
     try:
         post = Post.objects.filter(user=request.user).order_by('-created_at')
-        post_serializer = PostSerializer(post, many=True)
+        post_serializer = PostSerializer(post, many=True, context={"request": request})
         return Response(data=post_serializer.data, status=status.HTTP_200_OK)
     except:
         response["error"] = "Error occured while gettings posts"

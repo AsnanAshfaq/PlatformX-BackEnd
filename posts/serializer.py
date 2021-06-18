@@ -104,10 +104,11 @@ class PostSerializer(serializers.ModelSerializer):
         return post
 
     def get_is_editable(self, obj):
-        # if the user loged in has made this post
+        # if the user logged in has made this post
         # then enable the editing option
         user = UserSerializer(self.context['request'].user)
         # print("User who posted this post has id" + str(obj.user.id))
+        # print(user.data)
         # print("Logged in user has id" + str(user.data['id']))
         if (str(obj.user.id) == str(user.data['id'])):
             return True
