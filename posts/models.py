@@ -88,7 +88,7 @@ class Image(models.Model):
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="images", null=False)
     metadata = models.CharField(max_length=30, default="", null=True, blank=True)
-    path = models.ImageField(upload_to=get_image_path_and_filename, default="", )
+    path = models.ImageField(upload_to=get_image_path_and_filename, default="")
 
     def __str__(self):
         return str(self.id) + self.metadata
