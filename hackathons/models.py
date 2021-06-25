@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
+from user.models import Student
 from django.core.mail import send_mail
 
 
@@ -98,3 +99,10 @@ class Judge(models.Model):
     email = models.EmailField()
     company = models.TextField()
     photo = models.ImageField(upload_to=get_image_path, default="")
+
+
+class Participant(models.Model):
+    id = models.OneToOneField(to=Student, primary_key=True, on_delete=models.CASCADE, related_name="participant")
+    hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
+                                  related_name="participant")
+    join_date = models.DateTimeField(auto_now_add=True)

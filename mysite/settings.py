@@ -161,6 +161,14 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+# Email setup
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'platformx0@gmail.com'  # sender's email-id
+EMAIL_HOST_PASSWORD = 'fypplatformx0'  # sender's email-password
+EMAIL_USE_TLS = True
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 

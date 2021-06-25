@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Hackathon, Judge, Prize, Sponsor, Criteria
+from .models import Hackathon, Judge, Prize, Sponsor, Criteria, Participant
 from user.serializer import UserSerializer
 from user.models import User, Organization, ProfileImage, BackgroundImage, Follower
 
@@ -56,12 +56,19 @@ class OrganizationSerializer(serializers.ModelSerializer):
         fields = ['uuid', 'name', 'user']
 
 
+class ParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = "__all__"
+
+
 class HackathonSerializer(serializers.ModelSerializer):
     sponsors = SponsorSerializer(many=True, required=False)
     judges = JudgeSerializer(many=True)
     prizes = PrizeSerializer(many=True)
     criteria = CriteriaSerializer(many=True)
     organization = OrganizationSerializer(required=False, source='user')
+    participant = ParticipantSerializer(many=True)
 
     class Meta:
         model = Hackathon
@@ -84,3 +91,8 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
         for _, p in enumerate(prizes):
             total_prize += p['value']
         return total_prize
+
+    # def create(self, validated_data):
+    #     print("Validated data is")
+    #     print(validated_data)
+    #     return Participant.student
