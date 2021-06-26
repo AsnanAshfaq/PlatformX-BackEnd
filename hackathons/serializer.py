@@ -79,11 +79,14 @@ class HackathonSerializer(serializers.ModelSerializer):
 class HackathonBriefSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(required=False, source='user')
     total_prize = serializers.SerializerMethodField('calculate_prize')
+    participants = serializers.SerializerMethodField()
 
     class Meta:
         model = Hackathon
-        fields = ["id", "title", "tag_line", "description", "theme_tags", "start_of_hackathon", "end_of_hackathon",
-                  "prize_currency", "total_prize", "thumbnail_image", "organization", "created_at", "updated_at"]
+        fields = ["id", "title", "tag_line", "description", "theme_tags", "start_of_hackathon",
+                  "end_of_hackathon",
+                  "prize_currency", "total_prize", "participants", "thumbnail_image", "organization", "created_at",
+                  "updated_at"]
 
     def calculate_prize(self, obj):
         prizes = Prize.objects.filter(hackathon=obj).values('value')
@@ -92,7 +95,6 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
             total_prize += p['value']
         return total_prize
 
-    # def create(self, validated_data):
-    #     print("Validated data is")
-    #     print(validated_data)
-    #     return Participant.student
+    def get_participants(self, obj):
+        participants_length = Participant.objects.filter(hackathon=obj)
+        return len(list(participants_length))
