@@ -39,7 +39,6 @@ def get_all_hackathons(request):
                     except(serializers.ValidationError):
                         response['error'] = "Validation Error."
                         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
-                print(not_participated_hackathons)
             except(serializers.ValidationError):
                 response['error'] = "Validation Error."
                 return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
@@ -81,14 +80,15 @@ def get_hackathon(request, id):
 @permission_classes([IsAuthenticated])
 def register(request, id):
     try:
-        student = Student.objects.get(uuid=request.user)
+        student = User.objects.get(email=request.user)
         data = {
-            "id": student.uuid,
+            "id": student.id,
             "hackathon": id
         }
         response = {}
         participant_serializer = ParticipantSerializer(data=data)
         if participant_serializer.is_valid():
+            participant_serializer.save()
             response['success'] = "Registration Successful"
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:
