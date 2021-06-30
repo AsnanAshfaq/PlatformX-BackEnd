@@ -27,30 +27,25 @@ from user.models import User
 def create_post(request):
     try:
         response = {}
-        print(request.data)
         # return Response(data="Received data", status=status.HTTP_200_OK)
         serializer = PostSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             post = serializer.save()
-            print("Post Serializer is valid")
-            if request.data['path']:  # check if request has path attribute
+            dictionary = dict(request.data)
+            if 'path' in dictionary:  # check if request has path attribute
                 # loop through all of the images
-
-                request.data['post'] = post.id
+                # request.data['post'] = post.id
                 # convert queryDict into PythonDict
-                dictionary = dict(request.data)
                 path = dictionary['path']
                 metadata = dictionary['metadata']
                 # loop through all the images from request and save them
                 for index, path in enumerate(path):
                     image = Image.objects.create(post=post, metadata=metadata[index], path=path)
-            else:
-                print("Request has no attribute of path")
             response["success"] = "Post has been created"
             return Response(data=response, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
-        response["error"] = "Post can not be created"
-        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            response["error"] = "Post can not be created"
+            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except (PermissionDenied, APIException, KeyError) as e:
         response["error"] = "Post can not be created"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

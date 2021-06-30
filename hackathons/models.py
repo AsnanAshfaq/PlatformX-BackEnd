@@ -106,3 +106,5 @@ class Participant(models.Model):
     hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
                                   related_name="participant")
     join_date = models.DateTimeField(auto_now_add=True)
+
+
