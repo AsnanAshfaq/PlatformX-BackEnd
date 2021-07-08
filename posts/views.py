@@ -59,9 +59,9 @@ def edit_post(request):
         response = {}
         # check if the user is the author of the post
         post_query = Post.objects.get(id=request.data['post'])
-        if post_query.user != request.user:     # if user is not the author of the post then
+        if post_query.user != request.user:  # if user is not the author of the post then
             response["error"] = "You do not have the rights to edit this post."
-            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)       # return the response with error
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
         post_serializer = PostSerializer(post_query, data=request.data, context={"request": request})
         if post_serializer.is_valid():
             post = post_serializer.save()
@@ -100,7 +100,7 @@ def edit_post(request):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
-# get all posts
+# read all posts
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_posts(request):
@@ -122,6 +122,26 @@ def get_all_posts(request):
     except AttributeError:
         response["error"] = "Error occured while gettings posts"
         return Response(data=response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# delete single post
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def delete_post(request):
+    response = {}
+    try:
+        # check if the user is the author of the post
+        post_query = Post.objects.get(id=request.data['post'])
+        if post_query.user != request.user:  # if user is not the author of the post then
+            response["error"] = "You do not have the rights to delete this post."
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
+        post_query = Post.objects.get(id=request.data['post'])
+        post_query.delete()  # deleting post
+        response["success"] = "Post has been deleted"
+        return Response(data=response, status=status.HTTP_200_OK)
+    except:
+        response["error"] = "Error while deleting post"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
 # get posts of a single user
