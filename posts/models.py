@@ -93,9 +93,3 @@ class Image(models.Model):
 
     def __str__(self):
         return str(self.id) + self.metadata
-
-
-# message = "Hello Asnan, Welcome to PlatformX. We are really excited to work with you on our platform. Cheers ;)"
-# receipt_list = ['18asnan@gmail.com']
-# print("Sending mail to 18 asnan")
-# send_mail(subject="Testing Email", message=message, from_email=settings.EMAIL_HOST_USER, recipient_list=receipt_list)
