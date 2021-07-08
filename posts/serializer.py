@@ -63,13 +63,14 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data):
-        print("Calling from image serializer")
-        print("Validated data is")
-        print(validated_data)
-        # print(validated_data)
-        # validated_data['post'] = self.context['post']
         image = Image.objects.create(**validated_data)
         return image
+
+    def update(self, instance, validated_data):
+        instance.path = validated_data.get('path', instance.path)
+        instance.metadata = validated_data.get('metadata', instance.metadata)
+        instance.save()
+        return instance
 
 
 class PostVoteSerializer(serializers.ModelSerializer):
@@ -102,6 +103,11 @@ class PostSerializer(serializers.ModelSerializer):
         validated_data["user"] = self.context["request"].user
         post = Post.objects.create(**validated_data)
         return post
+
+    def update(self, instance, validated_data):
+        instance.text = validated_data.get('text', instance.text)
+        instance.save()
+        return instance
 
     def get_is_editable(self, obj):
         # if the user logged in has made this post

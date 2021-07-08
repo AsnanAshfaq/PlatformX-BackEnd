@@ -27,7 +27,6 @@ from user.models import User
 def create_post(request):
     try:
         response = {}
-        # return Response(data="Received data", status=status.HTTP_200_OK)
         serializer = PostSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             post = serializer.save()
@@ -47,18 +46,64 @@ def create_post(request):
             response["error"] = "Post can not be created"
             return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except (PermissionDenied, APIException, KeyError) as e:
-        response["error"] = "Post can not be created"
+        response["error"] = "Error while creating post"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
-# get all the posts from the database
-@api_view(['GET'])
+# edit post
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([FormParser, MultiPartParser])
+def edit_post(request):
+    try:
+        response = {}
+        post_query = Post.objects.get(id=request.data['post'])
+        post_serializer = PostSerializer(post_query, data=request.data, context={"request": request})
+        if post_serializer.is_valid():
+            post = post_serializer.save()
+            request_dict = dict(request.data)
+            if 'path' in request_dict:  # check if request has path attribute
+                # loop through all of the images
+                # request.data['post'] = post.id
+                # convert queryDict into PythonDict
+                path = request_dict['path']
+                metadata = request_dict['metadata']
+                # loop through all the images from request and save them
+                image_query = Image.objects.filter(post=request.data['post'])
+                for index, path in enumerate(path):
+                    if image_query:  # if images already exist on this post
+                        images_list = list(image_query)  # converting query set to python list
+                        image_serializer = ImageSerializer(images_list[index], data=request.data)
+                        if image_serializer.is_valid():
+                            image_serializer = image_serializer.save()
+                        else:
+                            print("Error while updating images")
+                            response["error"] = "Error while updating images"
+                            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+                    else:
+                        # create image instance
+                        Image.objects.create(post=post, metadata=metadata[index], path=path)
+            # post has been created with no images
+            response["success"] = "Post has been edited"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        else:
+            print(post_serializer.errors)
+            response["error"] = "Post can not be edited"
+            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+    except (PermissionDenied, APIException, KeyError) as e:
+        print(post_serializer.errors)
+        response["error"] = "Error while editing post"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# get all posts
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
 def get_all_posts(request):
     try:
         response = {}
-        # paginator = PageNumberPagination()
-        # paginator.page_size = 2
+        paginator = PageNumberPagination()
+        paginator.page_size = 2
         post = Post.objects.all().order_by('-created_at')
         # result_page = paginator.paginate_queryset(post, request)
         serializer = PostSerializer(post, many=True, context={"request": request})
@@ -87,15 +132,10 @@ def get_user_posts(request):
         return Response(data=post_serializer.data, status=status.HTTP_200_OK)
     except:
         response["error"] = "Error occured while gettings posts"
-        print(post_serializer)
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
-class ImagesViewSet(generics.ListAPIView):
-    queryset = Image.objects.all()
-    serializer_class = ImageSerializer
-
-
+# creating comment
 @api_view(['POST'])
 def create_comment(request):
     response = {}
@@ -106,10 +146,11 @@ def create_comment(request):
         response["success"] = "Comment has been created"
         return Response(data=response, status=status.HTTP_201_CREATED)
     else:
-        response["success"] = "Error while posting comment"
+        response["error"] = "Error while posting comment"
         return Response(data=response, status=status.HTTP_201_CREATED)
 
 
+# getting comments
 @api_view(['GET'])
 def get_comments(request, id):
     response = {}
