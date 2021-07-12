@@ -57,8 +57,10 @@ def create_post(request):
 def edit_post(request):
     try:
         response = {}
+        post_serializer = ''
+        request_dict = dict(request.data)
         # check if the user is the author of the post
-        post_query = Post.objects.get(id=request.data['post'])
+        post_query = Post.objects.get(id=request_dict['post'][0])
         if post_query.user != request.user:  # if user is not the author of the post then
             response["error"] = "You do not have the rights to edit this post."
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
@@ -95,7 +97,7 @@ def edit_post(request):
             response["error"] = "Post can not be edited"
             return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except (PermissionDenied, APIException, KeyError) as e:
-        print(post_serializer.errors)
+        print(post_serializer)
         response["error"] = "Error while editing post"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
