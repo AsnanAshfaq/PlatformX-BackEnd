@@ -12,6 +12,7 @@ class Post(models.Model):
     user = models.ForeignKey(
         'user.User', on_delete=models.CASCADE, related_name="post", default=1)
     text = models.TextField(max_length=1000, null=False)
+    category = models.TextField(max_length=30, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

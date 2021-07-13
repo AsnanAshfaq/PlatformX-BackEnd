@@ -55,9 +55,9 @@ def create_post(request):
 @permission_classes([IsAuthenticated])
 @parser_classes([FormParser, MultiPartParser])
 def edit_post(request):
+    post_serializer = ''
+    response = {}
     try:
-        response = {}
-        post_serializer = ''
         request_dict = dict(request.data)
         # check if the user is the author of the post
         post_query = Post.objects.get(id=request_dict['post'][0])
@@ -137,8 +137,7 @@ def delete_post(request):
         if post_query.user != request.user:  # if user is not the author of the post then
             response["error"] = "You do not have the rights to delete this post."
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
-        post_query = Post.objects.get(id=request.data['post'])
-        post_query.delete()  # deleting post
+        post_query.delete()  # delete the post
         response["success"] = "Post has been deleted"
         return Response(data=response, status=status.HTTP_200_OK)
     except:
