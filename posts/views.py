@@ -27,6 +27,8 @@ from user.models import User
 def create_post(request):
     try:
         response = {}
+        print("Request data is")
+        print(request.data)
         serializer = PostSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             post = serializer.save()
@@ -75,18 +77,26 @@ def edit_post(request):
                 path = request_dict['path']
                 metadata = request_dict['metadata']
                 # loop through all the images from request and save them
-                image_query = Image.objects.filter(post=request.data['post'])
                 for index, path in enumerate(path):
-                    if image_query:  # if images already exist on this post
-                        images_list = list(image_query)  # converting query set to python list
-                        image_serializer = ImageSerializer(images_list[index], data=request.data)
-                        if image_serializer.is_valid():
-                            image_serializer = image_serializer.save()
-                        else:
-                            print("Error while updating images")
-                            response["error"] = "Error while updating images"
-                            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
-                    else:
+                    # if image_query:  # if images already exist on this post
+                    #     data = {
+                    #         "post": request_dict['post'][0],
+                    #         "path": path,
+                    #         "metadata": metadata[index]
+                    #     }
+                    #     print("Data is")
+                    #     print(data)
+                    #     image_serializer = ImageSerializer(image_query[0], data=data)
+                    #     if image_serializer.is_valid():
+                    #         print('Saving image')
+                    #         print(image_serializer.instance)
+                    #         image_serializer = image_serializer.save()
+                    #     else:
+                    #         print(image_serializer.errors)
+                    #         print("Error while updating images")
+                    #         response["error"] = "Error while updating images"
+                    #         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+                    # else:
                         # create image instance
                         Image.objects.create(post=post, metadata=metadata[index], path=path)
             # post has been created with no images
