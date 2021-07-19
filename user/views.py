@@ -64,18 +64,16 @@ def delete_follower(request):
     response = {}
     try:
         user = User.objects.get(email=request.user)  # get authenticated user
-        followed_id = Follower.objects.get(followed_id=request.data['id'])
-        print("Followed id is")
-        print(followed_id)
-        if followed_id:
+        followed_query = Follower.objects.get(follower_id=user.id, followed_id=request.data['id'])
+        if followed_query:
 
             data = {
                 "follower_id": user.id,
-                "followed_id": followed_id
+                "followed_id": request.data['id']
             }
             follower_serializer = FollowerSerializer(data=data)
             if follower_serializer.is_valid():
-                # follower_serializer.save()
+                followed_query.delete()
                 response["success"] = "Follower Removed"
                 return Response(data=response, status=status.HTTP_201_CREATED)
             else:
