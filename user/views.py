@@ -77,7 +77,6 @@ def delete_follower(request):
                 response["success"] = "Follower Removed"
                 return Response(data=response, status=status.HTTP_201_CREATED)
             else:
-                print(follower_serializer.errors)
                 response['error'] = "Error occured"
             return Response(data=response, status=status.HTTP_200_OK)
         response['error'] = "Invalid Request"
