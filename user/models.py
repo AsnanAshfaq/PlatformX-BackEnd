@@ -106,7 +106,7 @@ class Student(models.Model):
 
 class Organization(models.Model):
     uuid = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="organization")
-    name = models.TextField(max_length=50,default='')
+    name = models.TextField(max_length=50, default='')
     reg_no = models.IntegerField()
     location = models.CharField(max_length=80)
 
@@ -127,7 +127,7 @@ class Follower(models.Model):
 
 class ProfileImage(models.Model):
     def get_image_path_and_filename(self, filename):
-        return "user_images" + "/profile_images/" + str(self.id) + "/" + str(filename)
+        return "user_images" + "/" + "profile_images" + "/" + str(self.id) + "/" + str(filename)
 
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)
