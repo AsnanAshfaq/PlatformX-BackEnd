@@ -11,11 +11,15 @@ from .serializer import FollowerSerializer, FollowedSerializer
 @permission_classes([IsAuthenticated])
 def get_followers(request):
     response = {}
+    follower_serializer = ''
     try:
         user = User.objects.get(email=request.user)  # get authenticated user
-        follower_query = Follower.objects.filter(follower_id=user.id)
+        follower_query = Follower.objects.filter(followed_id=user.id)
         follower_serializer = FollowerSerializer(follower_query, many=True)
+        # if follower_serializer.is_valid():
         return Response(data=follower_serializer.data, status=status.HTTP_200_OK)
+        response['error'] = "Error occured"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
         response['error'] = "Error occured"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
@@ -28,7 +32,7 @@ def get_following(request):
     response = {}
     try:
         user = User.objects.get(email=request.user)  # get authenticated user
-        followed_query = Follower.objects.filter(followed_id=user.id)
+        followed_query = Follower.objects.filter(follower_id=user.id)
         followed_serializer = FollowedSerializer(followed_query, many=True)
         return Response(data=followed_serializer.data, status=status.HTTP_200_OK)
     except:
@@ -69,19 +73,9 @@ def delete_follower(request):
         user = User.objects.get(email=request.user)  # get authenticated user
         followed_query = Follower.objects.get(follower_id=user.id, followed_id=request.data['id'])
         if followed_query:
-
-            data = {
-                "follower_id": user.id,
-                "followed_id": request.data['id']
-            }
-            follower_serializer = FollowerSerializer(data=data)
-            if follower_serializer.is_valid():
-                followed_query.delete()
-                response["success"] = "Follower Removed"
-                return Response(data=response, status=status.HTTP_201_CREATED)
-            else:
-                response['error'] = "Error occured"
-            return Response(data=response, status=status.HTTP_200_OK)
+            followed_query.delete()
+            response["success"] = "Following Removed"
+            return Response(data=response, status=status.HTTP_201_CREATED)
         response['error'] = "Invalid Request"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:

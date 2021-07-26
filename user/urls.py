@@ -10,5 +10,5 @@ urlpatterns = [
     path('follower/', get_followers),
     path('following/', get_following),
     path('follower/create', create_follower),
-    path('follower/delete', delete_follower)
+    path('following/delete', delete_follower)
 ]

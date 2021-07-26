@@ -17,16 +17,16 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class FollowerSerializer(serializers.ModelSerializer):
-    followed_id = UserSerializer()
-
-    class Meta:
-        model = Follower
-        exclude = ["follower_id"]
-
-
-class FollowedSerializer(serializers.ModelSerializer):
     follower_id = UserSerializer()
 
     class Meta:
         model = Follower
         exclude = ["followed_id"]
+
+
+class FollowedSerializer(serializers.ModelSerializer):
+    followed_id = UserSerializer()
+
+    class Meta:
+        model = Follower
+        exclude = ["follower_id"]
