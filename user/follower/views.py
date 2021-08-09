@@ -18,8 +18,6 @@ def get_followers(request):
         follower_serializer = FollowerSerializer(follower_query, many=True)
         # if follower_serializer.is_valid():
         return Response(data=follower_serializer.data, status=status.HTTP_200_OK)
-        response['error'] = "Error occured"
-        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
         response['error'] = "Error occured"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
@@ -30,6 +28,7 @@ def get_followers(request):
 @permission_classes([IsAuthenticated])
 def get_following(request):
     response = {}
+    followed_serializer = ''
     try:
         user = User.objects.get(email=request.user)  # get authenticated user
         followed_query = Follower.objects.filter(follower_id=user.id)
@@ -56,8 +55,7 @@ def create_follower(request):
             follower_serializer.save()
             response["success"] = "Follower Added"
             return Response(data=response, status=status.HTTP_201_CREATED)
-        else:
-            response['error'] = "Error occured"
+        response['error'] = "Error occured"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
         response['error'] = "Error occured"
