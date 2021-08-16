@@ -89,6 +89,9 @@ class User(AbstractUser):
     # custom manager
     objects = CustomUserManager()
 
+    def check_password(self, raw_password):
+        return super().check_password(raw_password=raw_password)
+
 
 class Student(models.Model):
     uuid = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="student")

@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from django.contrib.auth.hashers import check_password
 
 
 # Create your views here
@@ -45,14 +45,12 @@ def create_user(request):
         username = User.objects.filter(username=request.data['username'])
         if username:
             response['error'] = "User name already exists"
-            print(response)
             return Response(data=response, status=status.HTTP_200_OK)
 
         # check if email already exist
         email = User.objects.filter(email=request.data['email'])
         if email:
             response['error'] = "Email already exists"
-            print(response)
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
         # create user with given credentials
@@ -73,9 +71,29 @@ def create_user(request):
 
 @api_view(['POST'])
 def get_user_token(request):
-    # print(request.data)
-    print(request.data['email'], request.data['password'])
-    users = User.objects.all()
-    print(users)
-
-    return Response(data="User has requested for token", status=status.HTTP_200_OK)
+    response = {}
+    email = request.data['email']
+    password = request.data['password']
+    try:
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            response['email_error'] = "No Account exist with this email"
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+        if user:
+            # check for password
+            if check_password(password, user.password):
+                # get token
+                refresh = RefreshToken.for_user(user)
+                token = {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                }
+                response = token
+                return Response(data=response, status=status.HTTP_200_OK)
+            else:
+                response['password_error'] = "Password is incorrect"
+                return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+    except:
+        response['error'] = "An error occurred while signing in."
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
