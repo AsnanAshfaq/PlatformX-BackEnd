@@ -19,7 +19,7 @@ def get_user(request):
         user_serializer = UserSerializer(user)
         return Response(data=user_serializer.data, status=status.HTTP_200_OK)
 
-    except User.DoesNotExist:
+    except:
         response["error"] = "No such user exist"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
@@ -70,7 +70,7 @@ def create_user(request):
 
 
 @api_view(['POST'])
-def get_user_token(request):
+def signin(request):
     response = {}
     email = request.data['email']
     password = request.data['password']
@@ -93,6 +93,7 @@ def get_user_token(request):
                 return Response(data=response, status=status.HTTP_200_OK)
             else:
                 response['password_error'] = "Password is incorrect"
+
                 return Response(data=response, status=status.HTTP_404_NOT_FOUND)
     except:
         response['error'] = "An error occurred while signing in."

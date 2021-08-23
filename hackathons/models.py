@@ -102,9 +102,8 @@ class Judge(models.Model):
 
 
 class Participant(models.Model):
-    id = models.OneToOneField(to=Student, primary_key=True, on_delete=models.CASCADE, related_name="participant")
+    id = models.OneToOneField(to=Student, primary_key=True, on_delete=models.CASCADE,
+                              related_name="hackathon_participant")
     hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
                                   related_name="participant")
     join_date = models.DateTimeField(auto_now_add=True)
-
-

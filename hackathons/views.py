@@ -32,8 +32,8 @@ def get_all_hackathons(request):
                 for p in list(participant_serializer.data):  # loop through the list of data in participant
                     try:
                         # now get hackathons where user has not applied
-                        hackathons = Hackathon.objects.exclude(id=dict(p)['hackathon']).order_by('-created_at')
-                        hackathon_serializer = HackathonBriefSerializer(hackathons, many=True)
+                        hackathons_query = Hackathon.objects.exclude(id=dict(p)['hackathon']).order_by('-created_at')
+                        hackathon_serializer = HackathonBriefSerializer(hackathons_query, many=True)
                         not_participated_hackathons += hackathon_serializer.data
                         return Response(data=not_participated_hackathons, status=status.HTTP_200_OK)
                     except(serializers.ValidationError):
@@ -48,8 +48,8 @@ def get_all_hackathons(request):
             try:
                 # user has not applied for any hackathon
                 # so return all of the hackathons
-                hackathon = Hackathon.objects.all().order_by('-created_at')
-                hackathon_serializer = HackathonBriefSerializer(hackathon, many=True)
+                hackathon_query = Hackathon.objects.all().order_by('-created_at')
+                hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True)
                 return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
             except(serializers.ValidationError):
                 response['error'] = "Validation Error."

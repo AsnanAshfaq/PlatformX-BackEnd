@@ -22,13 +22,11 @@ class ChatConsumer(AsyncConsumer):
         if self.user == AnonymousUser():
             print("User is anonymous. Therefore closing the connection")
             await self.websocket_disconnect(close_code=1006)
-
         else:
             # get the user object for receiver user
             self.receiver = await self.get_receiver_user_object(username=self.receiver)
             # get the user object for sender user
             self.chat = await self.get_chat_object(sender=self.user, receiver=self.receiver)
-
             await self.channel_layer.group_add(str(self.chat.id).replace("-", ""), self.channel_name)
             await self.send({
                 "type": "websocket.accept",
@@ -73,7 +71,7 @@ class ChatConsumer(AsyncConsumer):
         try:
             chat = Chat.objects.get(
                 Q(user_first=sender, user_second=receiver) | Q(user_first=receiver, user_second=sender))
-            chat.save()
-        except ObjectDoesNotExist:
+            # chat.save()
+        except Chat.DoesNotExist:
             chat = Chat.objects.create(user_first=sender, user_second=receiver)
         return chat

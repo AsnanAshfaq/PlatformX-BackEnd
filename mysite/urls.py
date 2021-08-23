@@ -27,6 +27,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('posts.urls')),
     path('api/', include('hackathons.urls')),
+    path('api/', include('workshop.urls')),
     path('user/', include('user.urls')),
     # path('accounts/',include('django.contrib.auth.urls')),
     # path('api-token-auth/', views.obtain_auth_token, name='api-tokn-auth'),

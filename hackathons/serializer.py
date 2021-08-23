@@ -41,11 +41,11 @@ class UserFollowersSerializer(serializers.ModelSerializer):
 
 
 class HackathonUserSerializer(serializers.ModelSerializer):
-    user_profile_image = UserProfileImageSerializer()
+    profile_image = UserProfileImageSerializer(source='user_profile_image')
 
     class Meta:
         model = User
-        fields = ["user_profile_image"]
+        fields = ["profile_image"]
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
