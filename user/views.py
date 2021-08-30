@@ -6,6 +6,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import check_password
+from django.core.mail import send_mail
+from django.conf import settings
+from smtplib import SMTPException
 
 
 # Create your views here
@@ -98,3 +101,48 @@ def signin(request):
     except:
         response['error'] = "An error occurred while signing in."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# activate user account
+@api_view(['POST'])
+def activate_user(request):
+    print("Getting the request")
+    user = User.objects.get(email=request.user)
+    user.is_active = not user.is_active
+    user.save()
+    print(user.is_active)
+    response = {}
+    response['success'] = "Getting the request"
+    return Response(data=response, status=status.HTTP_200_OK)
+
+
+# reset password
+@api_view(['POST'])
+def password_reset(request):
+    response = {}
+    try:
+        user = User.objects.get(email=request.data['email'])
+        subject = "Password Reset"
+        message = "Dear User,\n\nYou are receiving this e-mail because you requested a password reset for your user account at PlatformX.\n\nPlease paste the following verification code in the field provided to continue.\n\nYour verification code is “32697”"
+        # sending mail to user
+        try:
+            send_mail(subject=subject, message=message, from_email=settings.EMAIL_HOST_USER,
+                      recipient_list=[user.email],
+                      fail_silently=False)
+            response['success'] = "Email has been sent successfully"
+            return Response(data=response, status=status.HTTP_200_OK)
+        except SMTPException as e:
+            print(e)
+            response['email_error'] = "Error occurred while sending email"
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except User.DoesNotExist:
+        response['error'] = "Email does not exist. Please enter a registered email"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+# check to verify code while resetting password
+def verify_code(request):
+    print(request.code)
+    response = {}
+    response['success'] = "Code has been verified"
+    return Response(data=response, status=status.HTTP_200_OK)
