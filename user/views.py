@@ -9,6 +9,8 @@ from django.contrib.auth.hashers import check_password
 from django.core.mail import send_mail
 from django.conf import settings
 from smtplib import SMTPException
+import pyotp
+from django.views.decorators.csrf import csrf_protect
 
 
 # Create your views here
@@ -81,7 +83,7 @@ def signin(request):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            response['email_error'] = "No Account exist with this email"
+            response['email_error'] = "No Account exists with given email address"
             return Response(data=response, status=status.HTTP_404_NOT_FOUND)
         if user:
             # check for password
@@ -95,6 +97,7 @@ def signin(request):
                 response = token
                 return Response(data=response, status=status.HTTP_200_OK)
             else:
+                print(password, user.password)
                 response['password_error'] = "Password is incorrect"
 
                 return Response(data=response, status=status.HTTP_404_NOT_FOUND)
@@ -123,13 +126,19 @@ def password_reset(request):
     try:
         user = User.objects.get(email=request.data['email'])
         subject = "Password Reset"
-        message = "Dear User,\n\nYou are receiving this e-mail because you requested a password reset for your user account at PlatformX.\n\nPlease paste the following verification code in the field provided to continue.\n\nYour verification code is “32697”"
+        # OTP instance
+        totp = pyotp.TOTP('base32secret3232')
+        otp = totp.now()
+        message = f"Dear User,\n\nYou are receiving this e-mail because you requested a password reset for your user " \
+                  f"account at PlatformX.\n\nPlease paste the following verification code in the field provided to " \
+                  f"continue.\n\nYour verification code is {otp}."
         # sending mail to user
         try:
             send_mail(subject=subject, message=message, from_email=settings.EMAIL_HOST_USER,
                       recipient_list=[user.email],
                       fail_silently=False)
             response['success'] = "Email has been sent successfully"
+            response['otp'] = otp
             return Response(data=response, status=status.HTTP_200_OK)
         except SMTPException as e:
             print(e)
@@ -140,9 +149,15 @@ def password_reset(request):
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
-# check to verify code while resetting password
-def verify_code(request):
-    print(request.code)
+@api_view(['POST'])
+def confirm_password_reset(request):
     response = {}
-    response['success'] = "Code has been verified"
-    return Response(data=response, status=status.HTTP_200_OK)
+    try:
+        user = User.objects.get(email=request.data['email'])
+        user.password = request.data['password']
+        user.save()
+        response['success'] = "Password has been changed successfully"
+        return Response(data=response, status=status.HTTP_201_CREATED)
+    except:
+        response['error'] = "Error occurred while resetting password"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
