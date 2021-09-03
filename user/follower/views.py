@@ -19,7 +19,7 @@ def get_followers(request):
         # if follower_serializer.is_valid():
         return Response(data=follower_serializer.data, status=status.HTTP_200_OK)
     except:
-        response['error'] = "Error occured"
+        response['error'] = "Error occurred"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -35,7 +35,7 @@ def get_following(request):
         followed_serializer = FollowedSerializer(followed_query, many=True)
         return Response(data=followed_serializer.data, status=status.HTTP_200_OK)
     except:
-        response['error'] = "Error occured"
+        response['error'] = "Error occurred"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -55,10 +55,10 @@ def create_follower(request):
             follower_serializer.save()
             response["success"] = "Follower Added"
             return Response(data=response, status=status.HTTP_201_CREATED)
-        response['error'] = "Error occured"
+        response['error'] = "Error occurred"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
-        response['error'] = "Error occured"
+        response['error'] = "Error occurred"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -77,5 +77,5 @@ def delete_follower(request):
         response['error'] = "Invalid Request"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
-        response['error'] = "Error occured"
+        response['error'] = "Error occurred"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)

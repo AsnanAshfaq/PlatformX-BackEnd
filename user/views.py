@@ -10,7 +10,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from smtplib import SMTPException
 import pyotp
-from django.views.decorators.csrf import csrf_protect
 
 
 # Create your views here
@@ -38,7 +37,7 @@ def get_all_users(request):
         user_serializer = Users(user, many=True)
         return Response(data=user_serializer.data, status=status.HTTP_200_OK)
     except:
-        response['error'] = "Error occured"
+        response['error'] = "Error occurred"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -114,8 +113,7 @@ def activate_user(request):
     user.is_active = not user.is_active
     user.save()
     print(user.is_active)
-    response = {}
-    response['success'] = "Getting the request"
+    response = {'success': "Getting the request"}
     return Response(data=response, status=status.HTTP_200_OK)
 
 
