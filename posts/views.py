@@ -14,7 +14,7 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework import status
-from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
+from rest_framework.parsers import FormParser, MultiPartParser
 
 from rest_framework.pagination import PageNumberPagination
 from user.models import User
@@ -97,8 +97,8 @@ def edit_post(request):
                     #         response["error"] = "Error while updating images"
                     #         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
                     # else:
-                        # create image instance
-                        Image.objects.create(post=post, metadata=metadata[index], path=path)
+                    # create image instance
+                    Image.objects.create(post=post, metadata=metadata[index], path=path)
             # post has been created with no images
             response["success"] = "Post has been edited"
             return Response(data=response, status=status.HTTP_201_CREATED)

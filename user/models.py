@@ -140,7 +140,7 @@ class ProfileImage(models.Model):
     path = models.ImageField(upload_to=get_image_path_and_filename, default="", )
 
     def __str__(self):
-        return str(self.metadata)
+        return str(self.id)
 
 
 class BackgroundImage(models.Model):
