@@ -10,5 +10,6 @@ urlpatterns = [
     path('all/', get_all_users),
     path('activate/', activate_user),
     path('', include('user.follower.urls')),
-    path('profile_image/', include('user.profile_image.urls'))
+    path('profile_image/', include('user.profile_image.urls')),
+    path('background_image/', include('user.background_image.urls'))
 ]
