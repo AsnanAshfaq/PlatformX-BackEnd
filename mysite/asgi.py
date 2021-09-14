@@ -9,18 +9,23 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 
 import os
 from django.core.asgi import get_asgi_application
+from django.urls import re_path, path
 from channels.routing import ProtocolTypeRouter, URLRouter
 from .token import TokenAuthMiddlewareStack
-from chat.routing import websocket_urlpatterns
+from posts.like.consumer import LikeConsumer
+from chat.consumer import ChatConsumer
+from channels.auth import AuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     # Just HTTP for now. (We can add other protocols later.)
-    "websocket": TokenAuthMiddlewareStack(
-        URLRouter(
-            websocket_urlpatterns
+    "websocket": AuthMiddlewareStack(
+        URLRouter([
+            re_path(r'ws/chat/(?P<username>\w+)/$', ChatConsumer.as_asgi()),
+            path('ws/like/<str:post_id>/<str:username>/', LikeConsumer.as_asgi()),
+        ]
         )
-    ),
+    )
 })

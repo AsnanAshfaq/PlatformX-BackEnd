@@ -105,6 +105,9 @@ def signin(request):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
+# --NOT DONE YET--
+
+
 # activate user account
 @api_view(['POST'])
 def activate_user(request):
