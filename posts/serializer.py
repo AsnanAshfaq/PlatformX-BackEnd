@@ -94,6 +94,7 @@ class PostSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, required=False)  # required=False
     user = PostUserSerializer(required=False)  # required=False
     is_editable = serializers.SerializerMethodField()
+    isLiked = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -110,12 +111,19 @@ class PostSerializer(serializers.ModelSerializer):
         return instance
 
     def get_is_editable(self, obj):
-        # if the user logged in has made this post
-        # then enable the editing option
+        # if the user logged in has made this post then enable the editing option
         user = UserSerializer(self.context['request'].user)
-        # print("User who posted this post has id" + str(obj.user.id))
-        # print(user.data)
-        # print("Logged in user has id" + str(user.data['id']))
-        if (str(obj.user.id) == str(user.data['id'])):
+
+        if str(obj.user.id) == str(user.data['id']):
             return True
         return False
+
+    def get_isLiked(self, obj):
+        user = UserSerializer(self.context['request'].user)
+
+        # query in like model where corresponding post and current user is found
+        like_query = Like.objects.filter(post=obj, user=user.data['id'])
+
+        if like_query:
+            return "Liked"
+        return "DisLiked"

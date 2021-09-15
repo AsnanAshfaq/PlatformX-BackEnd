@@ -23,7 +23,7 @@ application = ProtocolTypeRouter({
     # Just HTTP for now. (We can add other protocols later.)
     "websocket": AuthMiddlewareStack(
         URLRouter([
-            re_path(r'ws/chat/(?P<username>\w+)/$', ChatConsumer.as_asgi()),
+            path('ws/chat/<str:sender_username>/<str:receiver_username>/', ChatConsumer.as_asgi()),
             path('ws/like/<str:post_id>/<str:username>/', LikeConsumer.as_asgi()),
         ]
         )

@@ -54,11 +54,12 @@ class LikeConsumer(AsyncConsumer):
 
         await self.channel_layer.group_discard("post_like_channel", self.channel_name)
 
-        print(f'[{self.username}] Disconnected with code {close_code}')
-
         await self.send({
-            "type": "websocket.close"
+            "type": "websocket.close",
+            "code": close_code
         })
+
+        print(f'[{self.username}] Disconnected with code {close_code}')
 
     async def send_message(self, event):
         print(f'[{self.username}] Post has been {self.isLiked}')
@@ -73,7 +74,7 @@ class LikeConsumer(AsyncConsumer):
             "text": response
         })
 
-        await self.websocket_disconnect(1006)
+        await self.websocket_disconnect(4123)
 
     @database_sync_to_async
     def get_user_object(self, username):
@@ -81,7 +82,7 @@ class LikeConsumer(AsyncConsumer):
             user = User.objects.get(username=username)
             return user
         except User.DoesNotExist:
-            self.websocket_disconnect(1006)
+            self.websocket_disconnect(4123)
 
     @database_sync_to_async
     def get_post_object(self, post):
@@ -89,24 +90,29 @@ class LikeConsumer(AsyncConsumer):
             post = Post.objects.get(id=post)
             return post
         except Post.DoesNotExist:
-            self.websocket_disconnect(1006)
+            self.websocket_disconnect(4123)
 
     @database_sync_to_async
     def like_or_dislike(self, user, post):
 
-        isLiked = Like.objects.filter(user=user, post=post)
-        if isLiked:
-            # it means user has liked the post, make it disliked
-            isLiked.delete()
-            return "Disliked"
-        else:
-            # make the post liked by the user
-            like = Like.objects.create(user=user, post=post)
-            if like:
-                return "Liked"
+        try:
+            isLiked = Like.objects.filter(user=user, post=post)
+            if isLiked:
+                # it means user has liked the post, make it disliked
+                isLiked.delete()
+                return "DisLiked"
+            else:
+                # make the post liked by the user
+                like = Like.objects.create(user=user, post=post)
+                if like:
+                    return "Liked"
+        except Like.DoesNotExist:
+            self.websocket_disconnect(4123)
 
     @database_sync_to_async
     def get_like_count(self, post):
-
-        like = Like.objects.filter(post=post)
-        return like.count()
+        try:
+            like = Like.objects.filter(post=post)
+            return like.count()
+        except Like.DoesNotExist:
+            self.websocket_disconnect(4123)
