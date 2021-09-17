@@ -126,4 +126,4 @@ class PostSerializer(serializers.ModelSerializer):
 
         if like_query:
             return "Liked"
-        return "DisLiked"
+        return ""

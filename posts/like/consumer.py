@@ -61,6 +61,8 @@ class LikeConsumer(AsyncConsumer):
 
         print(f'[{self.username}] Disconnected with code {close_code}')
 
+        raise StopConsumer()
+
     async def send_message(self, event):
         print(f'[{self.username}] Post has been {self.isLiked}')
         # event['text'] = self.isLiked
