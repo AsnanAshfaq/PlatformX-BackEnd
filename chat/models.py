@@ -22,3 +22,9 @@ class Message(models.Model):
     chat_id = models.ForeignKey(Chat, related_name="chat_message", on_delete=models.CASCADE, default='')
     message = models.TextField(max_length=255, default="")
     timestamp = models.DateTimeField(auto_now_add=True)
+
+
+class ChannelModel(models.Model):
+    channel_name = models.TextField(max_length=255)
+
+

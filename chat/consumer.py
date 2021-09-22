@@ -2,7 +2,7 @@
 from channels.generic.websocket import WebsocketConsumer, SyncConsumer, AsyncWebsocketConsumer, \
     AsyncJsonWebsocketConsumer, AsyncConsumer, AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from .models import Message, Chat
+from .models import Message, Chat, ChannelModel
 from django.db.models import Q
 from user.models import User
 import json
@@ -41,10 +41,12 @@ class ChatConsumer(AsyncConsumer):
             self.chat = await self.get_chat_object(sender=self.sender, receiver=self.receiver)
 
             await self.channel_layer.group_add(str(self.chat.id).replace("-", ""), self.channel_name)
-            # get the user object for sender user
+
+            # accept the connection
             await self.send({
                 "type": "websocket.accept",
             })
+
             print(f'[{self.sender}] You are connected to the channel {self.channel_name}')
         else:
             await self.websocket_disconnect(close_code=4123)
@@ -123,3 +125,18 @@ class ChatConsumer(AsyncConsumer):
         except Chat.DoesNotExist:
             chat = Chat.objects.create(user_first=sender, user_second=receiver)
         return chat
+
+    @database_sync_to_async
+    def get_channel_object(self, channel_name):
+        try:
+            return ChannelModel.objects.filter(channel_name=channel_name)
+        except ChannelModel.DoesNotExist:
+            return None
+
+    @database_sync_to_async
+    def save_channel_object(self, channel_name):
+        return ChannelModel.objects.create(channel_name=channel_name)
+
+    @database_sync_to_async
+    def delete_channel_object(self, channel_name):
+        ChannelModel.objects.filter(channel_name=channel_name).delete()

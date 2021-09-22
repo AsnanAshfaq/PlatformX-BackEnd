@@ -70,14 +70,12 @@ class Like(models.Model):
 class Share(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         'user.User', on_delete=models.CASCADE, default=1)
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="shares", null=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return str(self.id)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Image(models.Model):

@@ -1,38 +1,9 @@
 from rest_framework import serializers
-from .models import Comment, Post, Like, Share, Image, CommentVote, PostVote
-from rest_framework.validators import UniqueValidator
-from user.serializer import UserSerializer, ProfileImageSerializer, BackgroundImageSerializer
+from .models import Post, Like, Image, PostVote
+from user.serializer import UserSerializer, ProfileImageSerializer
 from user.models import User
-
-
-class CommentVoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CommentVote
-        fields = "__all__"
-
-
-class CommentUserSerializer(serializers.ModelSerializer):
-    user_profile_image = ProfileImageSerializer()
-
-    class Meta:
-        model = User
-        fields = ['id', 'last_login', 'username', 'first_name', 'last_name', 'user_profile_image']
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    votes = CommentVoteSerializer(many=True, required=False)
-    user = CommentUserSerializer(required=False)
-
-    class Meta:
-        model = Comment
-        # exclude = ['post']
-        fields = '__all__'
-
-    def create(self, validated_data):
-        validated_data['user'] = self.context["request"].user
-        validated_data['text'] = self.data['text']
-        comment = Comment.objects.create(**validated_data)
-        return comment
+from .share.serializer import ShareSerializer
+from .comment.serializer import CommentSerializer, CommentVoteSerializer, CommentUserSerializer
 
 
 class LikeUserSerializer(serializers.ModelSerializer):
@@ -49,12 +20,6 @@ class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
         exclude = ['post']
-
-
-class ShareSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Share
-        exclude = ["post"]
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -93,6 +58,7 @@ class PostSerializer(serializers.ModelSerializer):
     votes = PostVoteSerializer(many=True, required=False)  # required=False
     images = ImageSerializer(many=True, required=False)  # required=False
     user = PostUserSerializer(required=False)  # required=False
+    shares = ShareSerializer(many=True)
     is_editable = serializers.SerializerMethodField()
     isLiked = serializers.SerializerMethodField()
 

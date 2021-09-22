@@ -132,7 +132,7 @@ def get_all_posts(request):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     except AttributeError:
-        response["error"] = "Error occured while gettings posts"
+        response["error"] = "Error occurred while getting posts"
         return Response(data=response, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -166,34 +166,8 @@ def get_user_posts(request):
         post_serializer = PostSerializer(post, many=True, context={"request": request})
         return Response(data=post_serializer.data, status=status.HTTP_200_OK)
     except:
-        response["error"] = "Error occured while gettings posts"
+        response["error"] = "Error occurred while getting posts"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
-# creating comment
-@api_view(['POST'])
-def create_comment(request):
-    response = {}
-    comment_serializer = CommentSerializer(data=request.data, context={"request": request})
-    if comment_serializer.is_valid():
-        print("Comment Serializer is valid")
-        comment_serializer.save()
-        response["success"] = "Comment has been created"
-        return Response(data=response, status=status.HTTP_201_CREATED)
-    else:
-        response["error"] = "Error while posting comment"
-        return Response(data=response, status=status.HTTP_201_CREATED)
 
-
-# getting comments
-@api_view(['GET'])
-def get_comments(request, id):
-    response = {}
-    try:
-        comment = Comment.objects.filter(post=id)
-        comment_serializer = CommentSerializer(comment, many=True)
-        response["success"] = "Comments found"
-        return Response(data=comment_serializer.data, status=status.HTTP_200_OK)
-    except Comment.DoesNotExist:
-        response["error"] = "Error while fetching comments"
-        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
