@@ -5,4 +5,5 @@ urlpatterns = [
     path('hackathon/<uuid:id>/register/', register),
     path('hackathon/<uuid:id>/', get_hackathon),
     path('hackathons/', get_all_hackathons),
+    path('hackathon/share/', include('hackathons.share.urls')),
 ]

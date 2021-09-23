@@ -26,3 +26,14 @@ class Participant(models.Model):
     workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE,
                                  related_name="participant")
     join_date = models.DateTimeField(auto_now_add=True)
+
+
+class Share(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(
+        'user.User', on_delete=models.CASCADE, related_name="workshop_share")
+    workshop = models.ForeignKey(
+        Workshop, on_delete=models.CASCADE, related_name="shares", null=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

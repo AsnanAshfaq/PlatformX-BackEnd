@@ -71,7 +71,7 @@ class Share(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(
-        'user.User', on_delete=models.CASCADE, default=1)
+        'user.User', on_delete=models.CASCADE, related_name="post_share")
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE, related_name="shares", null=False)
     created_at = models.DateTimeField(auto_now_add=True)

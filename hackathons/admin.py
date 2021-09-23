@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import Hackathon, Judge, Prize, Sponsor, Criteria, Participant
+from .models import Hackathon, Judge, Prize, Sponsor, Criteria, Participant, Share
 
 # Register your models here.
 
-admin.site.register([Hackathon, Judge, Prize, Sponsor, Criteria, Participant])
+admin.site.register([Hackathon, Judge, Prize, Sponsor, Criteria, Participant, Share])
