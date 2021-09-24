@@ -9,13 +9,6 @@ import json
 from channels.exceptions import StopConsumer
 
 
-# class UUIDEncoder(json.JSONEncoder):
-#     def default(self, obj):
-#         if isinstance(obj, UUID):
-#             return obj.hex
-#         return json.JSONEncoder.default(self, obj)
-
-
 class ChatConsumer(AsyncConsumer):
 
     def __init__(self):
@@ -43,6 +36,7 @@ class ChatConsumer(AsyncConsumer):
             await self.channel_layer.group_add(str(self.chat.id).replace("-", ""), self.channel_name)
 
             # accept the connection
+
             await self.send({
                 "type": "websocket.accept",
             })
@@ -62,6 +56,32 @@ class ChatConsumer(AsyncConsumer):
             "user_name": str(self.sender.username)
         })
 
+    async def send_message(self, event):
+        print(f'[{self.sender}] Message sent {event["text"]}')
+
+        # save it in the database
+        self.message_object = await self.save_message(user=self.sender, message=event['text'])
+
+        message_id = str(self.message_object.id)
+        message = self.message_object.message
+        created_at = str(self.message_object.created_at)
+        chat_id = str(self.message_object.chat_id.id)
+
+        # user id is coming from event dict
+        response = json.dumps({
+            'id': message_id,
+            'user_id': event['user_id'],
+            'message': message,
+            'created_at': created_at,
+            'chat_id': chat_id,
+            'user_name': event['user_name']
+        })
+
+        await self.send({
+            "type": "websocket.send",
+            "text": response
+        })
+
     async def websocket_disconnect(self, close_code):
 
         if self.chat:
@@ -76,32 +96,6 @@ class ChatConsumer(AsyncConsumer):
         raise StopConsumer()
 
         print(f'[{self.sender}] Disconnected with code {close_code}')
-
-    async def send_message(self, event):
-        print(f'[{self.sender}] Message sent {event["text"]}')
-
-        # save it in the database
-        self.message_object = await self.save_message(user=self.sender, message=event['text'])
-
-        message_id = str(self.message_object.id)
-        message = self.message_object.message
-        timestamp = str(self.message_object.timestamp)
-        chat_id = str(self.message_object.chat_id.id)
-
-        # user id is coming from event dict
-        response = json.dumps({
-            'id': message_id,
-            'user_id': event['user_id'],
-            'message': message,
-            'timestamp': timestamp,
-            'chat_id': chat_id,
-            'user_name': event['user_name']
-        })
-
-        await self.send({
-            "type": "websocket.send",
-            "text": response
-        })
 
     @database_sync_to_async
     def save_message(self, user, message):
