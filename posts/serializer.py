@@ -3,23 +3,8 @@ from .models import Post, Like, Image, PostVote
 from user.serializer import UserSerializer, ProfileImageSerializer
 from user.models import User
 from .share.serializer import ShareSerializer
-from .comment.serializer import CommentSerializer, CommentVoteSerializer, CommentUserSerializer
-
-
-class LikeUserSerializer(serializers.ModelSerializer):
-    # user_images = UserImageSerializer(many=True)
-
-    class Meta:
-        model = User
-        fields = ['id', 'last_login', 'username', 'first_name', 'last_name']
-
-
-class LikeSerializer(serializers.ModelSerializer):
-    user = LikeUserSerializer()
-
-    class Meta:
-        model = Like
-        exclude = ['post']
+from .comment.serializer import CommentSerializer
+from posts.like.serializer import LikeUserSerializer, LikeSerializer
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -58,7 +43,7 @@ class PostSerializer(serializers.ModelSerializer):
     votes = PostVoteSerializer(many=True, required=False)  # required=False
     images = ImageSerializer(many=True, required=False)  # required=False
     user = PostUserSerializer(required=False)  # required=False
-    shares = ShareSerializer(many=True)
+    shares = ShareSerializer(many=True,required=False)
     is_editable = serializers.SerializerMethodField()
     isLiked = serializers.SerializerMethodField()
 
@@ -93,3 +78,5 @@ class PostSerializer(serializers.ModelSerializer):
         if like_query:
             return "Liked"
         return ""
+
+

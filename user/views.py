@@ -48,13 +48,13 @@ def create_user(request):
         # check if username already exist
         username = User.objects.filter(username=request.data['username'])
         if username:
-            response['error'] = "User name already exists"
-            return Response(data=response, status=status.HTTP_200_OK)
+            response['user_name'] = "User name already exists"
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
         # check if email already exist
         email = User.objects.filter(email=request.data['email'])
         if email:
-            response['error'] = "Email already exists"
+            response['email_error'] = "Email already exists"
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
         # create user with given credentials

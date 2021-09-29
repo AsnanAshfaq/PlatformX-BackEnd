@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .serializer import AllWorkshopSerializer
 from .models import Workshop
+from django.db.models import Q
 
 
 # get all the workshops
@@ -22,3 +23,18 @@ def get_workshops(request):
         response['error'] = "Error while getting workshops"
         print(workshop_serializer.data)
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# searching post
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_workshop(request):
+    response = {}
+
+    if request.GET['q']:
+        workshop_search_string = request.GET['q']
+        workshop_query = Workshop.objects.filter(
+            Q(title__search=workshop_search_string) | Q(description__search=workshop_search_string)).order_by(
+            '-created_at')
+        workshop_serializer = AllWorkshopSerializer(workshop_query, many=True, context={"request": request})
+        return Response(data=workshop_serializer.data, status=status.HTTP_200_OK)

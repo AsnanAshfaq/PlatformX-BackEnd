@@ -7,9 +7,9 @@ from rest_framework import serializers
 from .models import Hackathon, Participant
 from user.models import Student, User
 from .serializer import HackathonSerializer, HackathonBriefSerializer, ParticipantSerializer
+from django.db.models import Q
 
 
-# i want to get all the hackathons where student.uuid is not a participant of
 # Create your views here.
 
 # get all hackathons
@@ -97,3 +97,29 @@ def register(request, id):
     except:
         response['error'] = "Bad request"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+# searching hackathon
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_hackathon(request):
+    response = {}
+
+    # fields to search -- title, tag_line, description
+
+    if request.GET['q']:
+        hackathon_search_string = request.GET['q']
+        hackathon_query = Hackathon.objects.filter(
+            Q(title__search=hackathon_search_string) | Q(tag_line__search=hackathon_search_string) | Q(
+                description__search=hackathon_search_string)).order_by(
+            '-created_at')
+        hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True, context={"request": request})
+        return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
+
+    # if request.GET['location']:
+    #     location_filter_string = request.GET['q']
+    #     hackathon_query = Hackathon.objects.filter(
+    #         Q(title__search=hackathon_search_string) | Q(tag_line__search=location_filter_string) | Q(
+    #             description__search=hackathon_search_string)).order_by(
+    #         '-created_at')
+    #     hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True, context={"request": request})
+    #     return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)

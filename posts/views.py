@@ -1,23 +1,12 @@
-from django.shortcuts import render
-from django.http import HttpResponse
 from .serializer import (PostSerializer, CommentSerializer, ImageSerializer)
-from user.serializer import UserSerializer
 from .models import Comment, Post, Image
-from rest_framework import (viewsets, permissions, generics, status)
-from rest_framework.serializers import ModelSerializer
-from rest_framework.response import Response
-from rest_framework.decorators import (api_view, permission_classes)
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
-
 from rest_framework.pagination import PageNumberPagination
-from user.models import User
 
 
 # Create post
@@ -27,21 +16,16 @@ from user.models import User
 def create_post(request):
     try:
         response = {}
-        print("Request data is")
-        print(request.data)
         serializer = PostSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             post = serializer.save()
             dictionary = dict(request.data)
             if 'path' in dictionary:  # check if request has path attribute
                 # loop through all of the images
-                # request.data['post'] = post.id
-                # convert queryDict into PythonDict
                 path = dictionary['path']
                 metadata = dictionary['metadata']
-                # loop through all the images from request and save them
                 for index, path in enumerate(path):
-                    image = Image.objects.create(post=post, metadata=metadata[index], path=path)
+                    Image.objects.create(post=post, metadata=metadata[index], path=path)
             response["success"] = "Post has been created"
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:
@@ -72,34 +56,12 @@ def edit_post(request):
             request_dict = dict(request.data)
             if 'path' in request_dict:  # check if request has path attribute
                 # loop through all of the images
-                # request.data['post'] = post.id
-                # convert queryDict into PythonDict
                 path = request_dict['path']
                 metadata = request_dict['metadata']
                 # loop through all the images from request and save them
                 for index, path in enumerate(path):
-                    # if image_query:  # if images already exist on this post
-                    #     data = {
-                    #         "post": request_dict['post'][0],
-                    #         "path": path,
-                    #         "metadata": metadata[index]
-                    #     }
-                    #     print("Data is")
-                    #     print(data)
-                    #     image_serializer = ImageSerializer(image_query[0], data=data)
-                    #     if image_serializer.is_valid():
-                    #         print('Saving image')
-                    #         print(image_serializer.instance)
-                    #         image_serializer = image_serializer.save()
-                    #     else:
-                    #         print(image_serializer.errors)
-                    #         print("Error while updating images")
-                    #         response["error"] = "Error while updating images"
-                    #         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
-                    # else:
                     # create image instance
                     Image.objects.create(post=post, metadata=metadata[index], path=path)
-            # post has been created with no images
             response["success"] = "Post has been edited"
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:
@@ -162,12 +124,22 @@ def get_user_posts(request):
     response = {}
     post_serializer = ""
     try:
-        post = Post.objects.filter(user=request.user).order_by('-created_at')
-        post_serializer = PostSerializer(post, many=True, context={"request": request})
+        post_query = Post.objects.filter(user=request.user).order_by('-created_at')
+        post_serializer = PostSerializer(post_query, many=True, context={"request": request})
         return Response(data=post_serializer.data, status=status.HTTP_200_OK)
     except:
         response["error"] = "Error occurred while getting posts"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
+# searching post
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_post(request):
+    response = {}
 
+    if request.GET['q']:
+        post_search_string = request.GET['q']
+        post_query = Post.objects.filter(text__search=post_search_string).order_by('-created_at')
+        post_serializer = PostSerializer(post_query, many=True, context={"request": request})
+        return Response(data=post_serializer.data, status=status.HTTP_200_OK)

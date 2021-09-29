@@ -1,7 +1,6 @@
 from django.db import models
 from user.models import User
 import uuid
-from django.db.models import Q
 
 
 class Chat(models.Model):
