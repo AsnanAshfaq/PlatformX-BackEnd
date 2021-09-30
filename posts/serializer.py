@@ -43,7 +43,7 @@ class PostSerializer(serializers.ModelSerializer):
     votes = PostVoteSerializer(many=True, required=False)  # required=False
     images = ImageSerializer(many=True, required=False)  # required=False
     user = PostUserSerializer(required=False)  # required=False
-    shares = ShareSerializer(many=True,required=False)
+    shares = ShareSerializer(many=True, required=False)
     is_editable = serializers.SerializerMethodField()
     isLiked = serializers.SerializerMethodField()
 
@@ -78,5 +78,3 @@ class PostSerializer(serializers.ModelSerializer):
         if like_query:
             return "Liked"
         return ""
-
-

@@ -8,6 +8,6 @@ urlpatterns = [
     path('post/search/', search_post),
     path('post/', get_user_posts),
     path('posts/', get_all_posts),
-    path('post/share/', include('posts.share.urls')),
+    path('post/', include('posts.share.urls')),
     path('post/', include('posts.comment.urls')),
 ]

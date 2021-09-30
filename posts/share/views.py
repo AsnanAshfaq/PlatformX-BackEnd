@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from posts.models import Post
-from .serializer import ShareSerializer
+from posts.models import Post, Share
+from .serializer import ShareSerializer, GetAllSharesSerializer
 from user.models import User
 
 
@@ -32,3 +32,12 @@ def create_share(request, ):
     except:
         response['error'] = "Error occurred while sharing post"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+# @permission_classes([IsAuthenticated])
+def get_all_share(request):
+    response = {}
+    share_query = Share.objects.all()
+    serializer = GetAllSharesSerializer(share_query, many=True)
+    return Response(data=serializer.data, status=status.HTTP_200_OK)

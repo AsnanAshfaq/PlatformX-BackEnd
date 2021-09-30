@@ -1,4 +1,6 @@
-from .models import User, Student, Follower
+import datetime
+
+from .models import User, Student, Follower, Organization
 from .serializer import UserSerializer, StudentSerializer, Users, FollowerSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
@@ -42,7 +44,7 @@ def get_all_users(request):
 
 
 @api_view(['POST'])
-def create_user(request):
+def create_student(request):
     response = {}
     try:
         # check if username already exist
@@ -74,6 +76,35 @@ def create_user(request):
 
 
 @api_view(['POST'])
+def create_organization(request):
+    response = {}
+    try:
+        # check if email already exist
+        email = User.objects.filter(email=request.data['email'])
+        if email:
+            response['email_error'] = "Email already exists"
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+        # create user with given credentials
+        user = User.objects.create_user(email=request.data['email'],
+                                        password=request.data['password'],
+                                        username=request.data['name'])
+        # create organization with given credentials
+        org = Organization.objects.create(uuid=user, name=request.data['name'], reg_no=request.data['reg_no'],
+                                          location=request.data['location'])
+        if user and org:
+            response['success'] = "Your account has been created successfully"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "An error has occurred while creating your account"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+    except:
+        response['error'] = "An error has occurred while creating your account"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
 def signin(request):
     response = {}
     email = request.data['email']
@@ -86,7 +117,7 @@ def signin(request):
             return Response(data=response, status=status.HTTP_404_NOT_FOUND)
         if user:
             # check for password
-            if check_password(password, user.password):
+            if password == user.password:
                 # get token
                 refresh = RefreshToken.for_user(user)
                 token = {
@@ -96,7 +127,6 @@ def signin(request):
                 response = token
                 return Response(data=response, status=status.HTTP_200_OK)
             else:
-                print(password, user.password)
                 response['password_error'] = "Password is incorrect"
 
                 return Response(data=response, status=status.HTTP_404_NOT_FOUND)
@@ -146,7 +176,7 @@ def password_reset(request):
             response['email_error'] = "Error occurred while sending email"
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except User.DoesNotExist:
-        response['error'] = "Email does not exist. Please enter a registered email"
+        response['email_error'] = "Email does not exist. Please enter a registered email"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 

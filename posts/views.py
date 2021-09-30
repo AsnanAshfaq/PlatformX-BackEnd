@@ -1,5 +1,5 @@
 from .serializer import (PostSerializer, CommentSerializer, ImageSerializer)
-from .models import Comment, Post, Image
+from .models import Comment, Post, Image, Share
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied, APIException
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.pagination import PageNumberPagination
+from posts.share.serializer import ShareSerializer, GetAllSharesSerializer
 
 
 # Create post
@@ -76,7 +77,7 @@ def edit_post(request):
 
 # read all posts
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 def get_all_posts(request):
     try:
         response = {}
@@ -91,6 +92,12 @@ def get_all_posts(request):
         # user_serializer = UserSerializer(user)
         # print(user_serializer.data)
         # return paginator.get_paginated_response(serializer.data)
+
+        # working on post shares
+
+        # share_query = Share.objects.all()
+        # serializer = GetAllSharesSerializer(share_query, many=True)
+        # print("Type ", isinstance(serializer))
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     except AttributeError:

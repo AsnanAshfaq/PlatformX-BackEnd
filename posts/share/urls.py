@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import create_share
+from .views import create_share, get_all_share
 
 urlpatterns = [
-    path('create/', create_share),
+    path('share/create/', create_share),
+    path('shares/', get_all_share),
+
 ]

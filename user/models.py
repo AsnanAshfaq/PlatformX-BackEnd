@@ -1,3 +1,5 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
@@ -110,8 +112,9 @@ class Student(models.Model):
 class Organization(models.Model):
     uuid = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="organization")
     name = models.TextField(max_length=50, default='')
-    reg_no = models.IntegerField()
+    reg_no = models.CharField(max_length=80)
     location = models.CharField(max_length=80)
+    incorporation_date = models.DateField(default=datetime.date.today)
 
     def save(self, *args, **kwargs):
         if hasattr(self.uuid, 'student'):
