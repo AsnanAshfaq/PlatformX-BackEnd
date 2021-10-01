@@ -24,6 +24,7 @@ def create_comment(request):
 
 # getting comments
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_comments(request, id):
     response = {}
     try:

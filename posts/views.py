@@ -77,7 +77,7 @@ def edit_post(request):
 
 # read all posts
 @api_view(['GET'])
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_all_posts(request):
     try:
         response = {}

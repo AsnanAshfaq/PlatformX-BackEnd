@@ -98,3 +98,11 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
     def get_participants(self, obj):
         participants_length = Participant.objects.filter(hackathon=obj)
         return len(list(participants_length))
+
+
+class GetUserHackathons(serializers.ModelSerializer):
+    organization = OrganizationSerializer(required=False, source='user')
+
+    class Meta:
+        model = Hackathon
+        fields = ["id","title", "description", "thumbnail_image", "organization", "created_at", "updated_at"]

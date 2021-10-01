@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import serializers
 from .models import Hackathon, Participant
-from user.models import Student, User
-from .serializer import HackathonSerializer, HackathonBriefSerializer, ParticipantSerializer
+from user.models import Student, User, Organization
+from .serializer import HackathonSerializer, HackathonBriefSerializer, ParticipantSerializer, GetUserHackathons
 from django.db.models import Q
 
 
@@ -71,7 +71,7 @@ def get_hackathon(request, id):
         hackathon_serializer = HackathonSerializer(hackathon)
         return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
     except:
-        response["error"] = "Error occured while getting hackathon."
+        response["error"] = "Error occurred while getting hackathon."
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -92,11 +92,12 @@ def register(request, id):
             response['success'] = "Registration Successful"
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:
-            response['error'] = "Error while registering for the hackathon"
+            response['error'] = "Error occurred while registering for the hackathon"
             return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
         response['error'] = "Bad request"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
 
 # searching hackathon
 @api_view(['GET'])
@@ -123,3 +124,18 @@ def search_hackathon(request):
     #         '-created_at')
     #     hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True, context={"request": request})
     #     return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
+
+
+# get hackathons of a single user
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_hackathons(request):
+    response = {}
+    try:
+        user = User.objects.get(email=request.user)
+        hackathon_query = Hackathon.objects.filter(user=user.id).order_by('-created_at')
+        hackathon_serializer = GetUserHackathons(hackathon_query, many=True)
+        return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
+    except:
+        response["error"] = "Error occurred while getting hackathon."
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

@@ -117,7 +117,7 @@ def signin(request):
             return Response(data=response, status=status.HTTP_404_NOT_FOUND)
         if user:
             # check for password
-            if password == user.password:
+            if check_password(password, user.password):
                 # get token
                 refresh = RefreshToken.for_user(user)
                 token = {
