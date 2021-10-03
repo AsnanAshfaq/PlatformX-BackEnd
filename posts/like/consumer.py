@@ -4,10 +4,6 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, SyncConsumer, AsyncWebsocketConsumer, \
     AsyncJsonWebsocketConsumer, AsyncConsumer, AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-# from .models import Message, Chat
-from django.core.exceptions import ObjectDoesNotExist
-from channels.layers import get_channel_layer
-from django.db.models import Q
 from user.models import User
 from posts.models import Like, Post
 import json
@@ -42,7 +38,7 @@ class LikeConsumer(AsyncConsumer):
 
     async def websocket_receive(self, event):
         # print(f'[{self.user}] Recieved message {event["text"]}')
-        #
+
         # # save it in the database
         # self.message = await self.save_message(user=self.user, message=event['text'])
         await self.channel_layer.group_send("post_like_channel", {

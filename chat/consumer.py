@@ -1,14 +1,15 @@
 # chat/consumers.py
-from channels.generic.websocket import AsyncConsumer
+from channels.generic.websocket import AsyncConsumer, AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Message, Chat, ChannelModel
 from django.db.models import Q
-from user.models import User
+from user.models import User, ProfileImage
 import json
 from channels.exceptions import StopConsumer
+from asgiref.sync import sync_to_async
 
 
-class ChatConsumer(AsyncConsumer):
+class ChatConsumer(AsyncWebsocketConsumer):
 
     def __init__(self):
         self.receiver = None
@@ -36,9 +37,7 @@ class ChatConsumer(AsyncConsumer):
 
             # accept the connection
 
-            await self.send({
-                "type": "websocket.accept",
-            })
+            await self.accept()
 
             print(f'[{self.sender}] You are connected to the channel {self.channel_name}')
         else:
@@ -61,11 +60,11 @@ class ChatConsumer(AsyncConsumer):
         # save it in the database
         self.message_object = await self.save_message(user=self.sender, message=event['text'])
 
+        profile_image = await self.get_receiver_profile_image()
         message_id = str(self.message_object.id)
         message = self.message_object.message
         created_at = str(self.message_object.created_at)
         chat_id = str(self.message_object.chat_id.id)
-
         # user id is coming from event dict
         response = json.dumps({
             'id': message_id,
@@ -73,13 +72,13 @@ class ChatConsumer(AsyncConsumer):
             'message': message,
             'created_at': created_at,
             'chat_id': chat_id,
-            'user_name': event['user_name']
+            'user_name': event['user_name'],
+            "profile_image": profile_image
         })
 
-        await self.send({
-            "type": "websocket.send",
+        await self.send(json.dumps({
             "text": response
-        })
+        }))
 
     async def websocket_disconnect(self, close_code):
 
@@ -133,3 +132,11 @@ class ChatConsumer(AsyncConsumer):
     @database_sync_to_async
     def delete_channel_object(self, channel_name):
         ChannelModel.objects.filter(channel_name=channel_name).delete()
+
+    @database_sync_to_async
+    def get_all_messages(self, chat_id):
+        return Message.objects.order_by('-created_at').filter(chat_id=chat_id).all()[:30]
+
+    @database_sync_to_async
+    def get_receiver_profile_image(self):
+        return ProfileImage.objects.filter(user=self.receiver).path

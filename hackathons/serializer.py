@@ -105,4 +105,4 @@ class GetUserHackathons(serializers.ModelSerializer):
 
     class Meta:
         model = Hackathon
-        fields = ["id","title", "description", "thumbnail_image", "organization", "created_at", "updated_at"]
+        fields = ["id", "title", "description", "thumbnail_image", "organization", "created_at", "updated_at"]

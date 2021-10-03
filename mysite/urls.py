@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/', include('hackathons.urls')),
     path('api/', include('workshop.urls')),
     path('user/', include('user.urls')),
+    path('chat/', include('chat.urls')),
     # path('accounts/',include('django.contrib.auth.urls')),
     # path('api-token-auth/', views.obtain_auth_token, name='api-tokn-auth'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
