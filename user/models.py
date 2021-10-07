@@ -97,11 +97,17 @@ class User(AbstractUser):
 
 class Student(models.Model):
     uuid = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name="student")
-    education = models.CharField(max_length=80)
-    bio = models.CharField(max_length=80)
-    lives_in = models.CharField(max_length=80)
+    education = models.CharField(max_length=80, blank=True)
+    bio = models.CharField(max_length=80, blank=True)
+    lives_in = models.CharField(max_length=80, blank=True)
     skills = ArrayField(models.CharField(max_length=20, blank=True))
     interests = ArrayField(models.CharField(max_length=20, blank=True))
+    date_of_birth = models.DateField(default=datetime.date.today, blank=True)
+    phone_number = models.CharField(max_length=20, default="", blank=True)
+    linked_in = models.URLField(default="", blank=True)
+    github = models.URLField(default="", blank=True)
+    twitter = models.URLField(default="", blank=True)
+    portfolio = models.URLField(default="", blank=True)
 
     def save(self, *args, **kwargs):
         if hasattr(self.uuid, 'organization'):

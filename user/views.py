@@ -1,7 +1,7 @@
 import datetime
 
 from .models import User, Student, Follower, Organization
-from .serializer import UserSerializer, StudentSerializer, Users, FollowerSerializer
+from .serializer import UserSerializer, StudentSerializer, Users, FollowerSerializer, EditStudentSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -73,6 +73,35 @@ def create_student(request):
     except:
         response['error'] = "An error has occurred while creating your account"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# editing student
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def edit_student(request):
+    response = {}
+    user = User.objects.get(email=request.user)
+    # check for first name
+    if 'first_name' in request.data:
+        user.first_name = request.data['first_name']
+    # check for last name
+    if 'last_name' in request.data:
+        user.last_name = request.data['last_name']
+    # check if username already exist
+    if 'username' in request.data:
+        username = User.objects.filter(username=request.data['username'])
+        if username:
+            response['user_name'] = "User name already exists"
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            user.username = request.data['username']
+    user.save()
+    student_serializer = EditStudentSerializer(request.user, data=request.data, partial=True)
+    if student_serializer.is_valid():
+        response['success'] = "Profile has been updated"
+        return Response(data=response, status=status.HTTP_201_CREATED)
+    response['error'] = "Error occurred while updating profile"
+    return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])

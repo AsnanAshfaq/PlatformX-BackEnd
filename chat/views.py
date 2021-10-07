@@ -19,7 +19,7 @@ def get_messages(request, receiver):
     receiver_id = User.objects.get(username=receiver).id
     chat = Chat.objects.get(
         Q(user_first=sender_id, user_second=receiver_id) | Q(user_first=receiver_id, user_second=sender_id))
-    messages = Message.objects.filter(chat_id=chat.id).order_by('-created_at')[:30]
+    messages = Message.objects.filter(chat_id=chat.id).order_by('-created_at')[:5]
     message_serializer = GetMessagesSerializer(messages, many=True)
     return Response(data=message_serializer.data, status=status.HTTP_200_OK)
 

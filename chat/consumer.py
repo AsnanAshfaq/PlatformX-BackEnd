@@ -64,21 +64,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_id = str(self.message_object.id)
         message = self.message_object.message
         created_at = str(self.message_object.created_at)
-        chat_id = str(self.message_object.chat_id.id)
         # user id is coming from event dict
         response = json.dumps({
             'id': message_id,
             'user_id': event['user_id'],
             'message': message,
             'created_at': created_at,
-            'chat_id': chat_id,
             'user_name': event['user_name'],
-            "profile_image": profile_image
+            "profile_image": str(profile_image)
         })
 
-        await self.send(json.dumps({
-            "text": response
-        }))
+        await self.send(response)
 
     async def websocket_disconnect(self, close_code):
 
@@ -139,4 +135,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_receiver_profile_image(self):
-        return ProfileImage.objects.filter(user=self.receiver).path
+        return ProfileImage.objects.get(user=self.receiver).path

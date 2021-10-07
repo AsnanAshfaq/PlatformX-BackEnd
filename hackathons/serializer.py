@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Hackathon, Judge, Prize, Sponsor, Criteria, Participant
 from user.serializer import UserSerializer
 from user.models import User, Organization, ProfileImage, BackgroundImage, Follower
+from django.utils.timezone import now
 
 
 class CriteriaSerializer(serializers.ModelSerializer):
@@ -80,12 +81,14 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(required=False, source='user')
     total_prize = serializers.SerializerMethodField('calculate_prize')
     participants = serializers.SerializerMethodField()
+    days_left = serializers.SerializerMethodField()
 
     class Meta:
         model = Hackathon
         fields = ["id", "title", "tag_line", "description", "theme_tags", "start_of_hackathon",
                   "end_of_hackathon",
-                  "prize_currency", "total_prize", "participants", "thumbnail_image", "organization", "created_at",
+                  "prize_currency", "total_prize", "participants", "days_left", "thumbnail_image", "organization",
+                  "created_at",
                   "updated_at"]
 
     def calculate_prize(self, obj):
@@ -98,6 +101,9 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
     def get_participants(self, obj):
         participants_length = Participant.objects.filter(hackathon=obj)
         return len(list(participants_length))
+
+    def get_days_left(self, obj):
+        return (obj.end_of_hackathon - now()).days
 
 
 class GetUserHackathons(serializers.ModelSerializer):
