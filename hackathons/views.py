@@ -63,7 +63,6 @@ def get_all_hackathons(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_hackathon(request, id):
-    print("id is", id)
     hackathon_serializer = ""
     response = {}
     try:
@@ -139,3 +138,10 @@ def get_user_hackathons(request):
     except:
         response["error"] = "Error occurred while getting hackathon."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST '])
+@permission_classes([IsAuthenticated])
+def create_hackathon_project(request, id):
+    response = {}
+    return Response(data=response, status=status.HTTP_201_CREATED)
