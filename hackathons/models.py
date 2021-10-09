@@ -77,7 +77,8 @@ class Criteria(models.Model):
 class Sponsor(models.Model):
 
     def get_image_path(self, filename):
-        return "hackathon" + "/" + str(self.hackathon.id) + "/" + "sponsors" + "/" + str(self.name) + "-" + str(filename)
+        return "hackathon" + "/" + str(self.hackathon.id) + "/" + "sponsors" + "/" + str(self.name) + "-" + str(
+            filename)
 
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -138,8 +139,8 @@ class Project(models.Model):
     description = models.TextField(default='')
     tag_line = models.TextField(default='')
     about = models.TextField(default='')
-    built_with = ArrayField(models.TextField(max_length=25))
-    links = ArrayField(base_field=models.URLField())
+    built_with = ArrayField(models.TextField(max_length=25, default=""), blank=True, default=list)
+    links = ArrayField(base_field=models.URLField(default=""), blank=True, default=list)
     video_link = models.URLField(default="", blank=True)
 
 
