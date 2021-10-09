@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
-from user.models import Student
+from user.models import Student, User
 from django.core.mail import send_mail
 
 
@@ -103,7 +103,7 @@ class Judge(models.Model):
 
 
 class Participant(models.Model):
-    id = models.OneToOneField(to=Student, primary_key=True, on_delete=models.CASCADE,
+    id = models.OneToOneField(to=User, primary_key=True, on_delete=models.CASCADE,
                               related_name="hackathon_participant")
     hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
                                   related_name="participant")

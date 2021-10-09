@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .serializer import ProjectSerializer
-from user.models import User, Student
+from user.models import User
 from hackathons.models import Project
 from django.db.models import Q
 

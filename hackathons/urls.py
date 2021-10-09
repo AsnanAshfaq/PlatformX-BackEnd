@@ -1,9 +1,12 @@
 from django.urls import path, include
-from .views import get_all_hackathons, get_hackathon, register, search_hackathon, get_user_hackathons
+from .views import get_all_hackathons, get_hackathon, register, search_hackathon, get_user_hackathons, get_participants, \
+    search_participants
 
 urlpatterns = [
     path('hackathon/<uuid:id>/register/', register),
     path('hackathon/<uuid:id>/project/', include('hackathons.project.urls')),
+    path('hackathon/<uuid:id>/participants/', get_participants),
+    path('hackathon/<uuid:id>/participants/search/', search_participants),
     path('hackathon/<uuid:id>/', get_hackathon),
     path('hackathon/search/', search_hackathon),
     path('hackathon/', get_user_hackathons),

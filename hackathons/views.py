@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from .models import Hackathon, Participant
 from user.models import Student, User, Organization
-from .serializer import HackathonSerializer, HackathonBriefSerializer, ParticipantSerializer, GetUserHackathons
+from .serializer import HackathonSerializer, HackathonBriefSerializer, GetParticipantSerializer, ParticipantSerializer, \
+    RegisterParticipantSerializer, GetUserHackathonsSerializer
 from django.db.models import Q
 
 
@@ -85,7 +86,7 @@ def register(request, id):
             "hackathon": id
         }
         response = {}
-        participant_serializer = ParticipantSerializer(data=data)
+        participant_serializer = RegisterParticipantSerializer(data=data)
         if participant_serializer.is_valid():
             participant_serializer.save()
             response['success'] = "Registration Successful"
@@ -133,8 +134,42 @@ def get_user_hackathons(request):
     try:
         user = User.objects.get(email=request.user)
         hackathon_query = Hackathon.objects.filter(user=user.id).order_by('-created_at')
-        hackathon_serializer = GetUserHackathons(hackathon_query, many=True)
+        hackathon_serializer = GetUserHackathonsSerializer(hackathon_query, many=True)
         return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
     except:
         response["error"] = "Error occurred while getting hackathon."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# get all participants of a single hackathon
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_participants(request, id):
+    response = {}
+    try:
+        participants_query = Participant.objects.filter(hackathon=id)
+        participant_serializer = GetParticipantSerializer(participants_query, many=True)
+        return Response(data=participant_serializer.data, status=status.HTTP_200_OK)
+    except:
+        print(participant_serializer)
+        response['error'] = "Error occurred while getting participants"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# search participants of a single hackathon
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_participants(request, id):
+    response = {}
+    if request.GET['q']:
+        participant_search_string = request.GET['q']
+        # search for user's
+        user_query = User.objects.filter(
+            Q(first_name__search=participant_search_string) | Q(last_name__search=participant_search_string) | Q(
+                username__search=participant_search_string))
+        search_query = Participant.objects.filter(hackathon=id).filter(id__in=user_query)
+        participant_serializer = GetParticipantSerializer(search_query, many=True)
+        return Response(data=participant_serializer.data, status=status.HTTP_200_OK)
+
+    response['error'] = "Nothing Found"
+    return Response(data=response, status=status.HTTP_404_NOT_FOUND)

@@ -1,8 +1,50 @@
 from rest_framework import serializers
 from .models import Hackathon, Judge, Prize, Sponsor, Criteria, Participant
 from user.serializer import UserSerializer
-from user.models import User, Organization, ProfileImage, BackgroundImage, Follower
+from user.models import User, Organization, ProfileImage, BackgroundImage, Follower, Student
 from django.utils.timezone import now
+
+
+class UserProfileImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProfileImage
+        fields = "__all__"
+
+
+class UserFollowersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follower
+        fields = "__all__"
+
+
+class HackathonUserSerializer(serializers.ModelSerializer):
+    profile_image = UserProfileImageSerializer(source='user_profile_image')
+
+    class Meta:
+        model = User
+        fields = ["profile_image"]
+
+
+class RegisterParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = "__all__"
+
+
+class ParticipantUserSerializer(serializers.ModelSerializer):
+    profile_image = UserProfileImageSerializer(source='user_profile_image')
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'profile_image']
+
+
+class GetParticipantSerializer(serializers.ModelSerializer):
+    user = ParticipantUserSerializer(source='id')
+
+    class Meta:
+        model = Participant
+        fields = ["user"]
 
 
 class CriteriaSerializer(serializers.ModelSerializer):
@@ -27,26 +69,6 @@ class JudgeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Judge
         fields = '__all__'
-
-
-class UserProfileImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProfileImage
-        fields = "__all__"
-
-
-class UserFollowersSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Follower
-        fields = "__all__"
-
-
-class HackathonUserSerializer(serializers.ModelSerializer):
-    profile_image = UserProfileImageSerializer(source='user_profile_image')
-
-    class Meta:
-        model = User
-        fields = ["profile_image"]
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -106,7 +128,7 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
         return (obj.end_of_hackathon - now()).days
 
 
-class GetUserHackathons(serializers.ModelSerializer):
+class GetUserHackathonsSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(required=False, source='user')
 
     class Meta:
