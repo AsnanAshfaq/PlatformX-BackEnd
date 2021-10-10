@@ -85,7 +85,10 @@ def get_all_posts(request):
         paginator.page_size = 2
         post = Post.objects.all().order_by('-created_at')
         # result_page = paginator.paginate_queryset(post, request)
+
         serializer = PostSerializer(post, many=True, context={"request": request})
+        # serializer = PostSerializer(models, context={"request": request})
+
         # print(serializer.data[0].user)
         # user_uuid = serializer.data[0]["user"]
         # user = User.objects.get(id=user_uuid)
@@ -94,8 +97,8 @@ def get_all_posts(request):
         # return paginator.get_paginated_response(serializer.data)
 
         # working on post shares
-
         # share_query = Share.objects.all()
+
         # serializer = GetAllSharesSerializer(share_query, many=True)
         # print("Type ", isinstance(serializer))
         return Response(data=serializer.data, status=status.HTTP_200_OK)

@@ -37,10 +37,10 @@ def get_all_hackathons(request):
                         hackathon_serializer = HackathonBriefSerializer(hackathons_query, many=True)
                         not_participated_hackathons += hackathon_serializer.data
                         return Response(data=not_participated_hackathons, status=status.HTTP_200_OK)
-                    except(serializers.ValidationError):
+                    except serializers.ValidationError:
                         response['error'] = "Validation Error."
                         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
-            except(serializers.ValidationError):
+            except serializers.ValidationError:
                 response['error'] = "Validation Error."
                 return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -52,11 +52,11 @@ def get_all_hackathons(request):
                 hackathon_query = Hackathon.objects.all().order_by('-created_at')
                 hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True)
                 return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
-            except(serializers.ValidationError):
+            except serializers.ValidationError:
                 response['error'] = "Validation Error."
                 return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
-        response['error'] = "Error occured while getting hackathons."
+        response['error'] = "Error occurred while getting hackathons."
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -151,7 +151,6 @@ def get_participants(request, id):
         participant_serializer = GetParticipantSerializer(participants_query, many=True)
         return Response(data=participant_serializer.data, status=status.HTTP_200_OK)
     except:
-        print(participant_serializer)
         response['error'] = "Error occurred while getting participants"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 

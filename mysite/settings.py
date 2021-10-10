@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'workshop',
     'user',
     'chat',
+    'payment',
     'corsheaders',
     # 'django.contrib.sites',
     'django.contrib.admin',
@@ -185,7 +186,8 @@ EMAIL_PORT = 25
 EMAIL_HOST_USER = 'platformx0@gmail.com'  # sender's email-id
 EMAIL_HOST_PASSWORD = 'fypplatformx0'  # sender's email-password
 EMAIL_USE_TLS = True
-
+STRIPE_TEST_PUBLISHABLE_KEY = "pk_test_51HRDPECHXQU9MKUUTD5oZz5Sl7fgmLoA6Gw1bBRmY80WNpY6eLFK5kzAzMCMOKMgzMNC6JQBy2R3d0SMQcglhgWS00jrARGFuA"
+STRIPE_TEST_SECRET_KEY = "sk_test_51HRDPECHXQU9MKUUVFspFfZhFQFUFPmEbwZZz3VEshjFT3pSjX6KYmUsJGArOYhGyAItvluP3kRppS3eDKkXT8lU00xXdlahXv"
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
