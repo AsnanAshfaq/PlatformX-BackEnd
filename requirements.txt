@@ -51,6 +51,7 @@ service-identity==21.1.0
 six==1.15.0
 soupsieve==2.2.1
 sqlparse==0.4.1
+stripe==2.60.0
 toml==0.10.2
 tornado==6.1
 Twisted==21.7.0

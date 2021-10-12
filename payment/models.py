@@ -9,4 +9,4 @@ class Payment(models.Model):
     user = models.ForeignKey(
         'user.Organization', on_delete=models.CASCADE, related_name="payment", default=1)
 
-
+# charge_id, created_at, updated_at

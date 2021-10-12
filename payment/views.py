@@ -20,7 +20,6 @@ def create_payment(request):
         currency="usd",
         source="tok_amex",
         description="My First Test Charge (created for API docs)",
-        receipt_email= "18asnan@gmail.com"
     )
     # store the response id in db
     # capturing stripe payment
