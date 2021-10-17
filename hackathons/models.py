@@ -32,7 +32,7 @@ class Hackathon(models.Model):
     description = models.TextField(default='')
     contact_email = models.EmailField(default='')
     theme_tags = ArrayField(models.CharField(max_length=25, blank=True), default=list)
-    participant_age_required = models.IntegerField(default=1)
+    participant_age_required = models.IntegerField(default=1)   # remove
     is_team_required = models.BooleanField(default=False, null=False)
     rules = models.TextField(default='')
     resource = models.TextField(default='')
@@ -42,7 +42,7 @@ class Hackathon(models.Model):
     end_of_hackathon = models.DateTimeField(default=timezone.now)
     upload_file_type = models.CharField(max_length=25, blank=False, default='')
     is_video_required = models.BooleanField(default=False)
-    is_public_voting_enable = models.BooleanField(default=False)
+    is_public_voting_enable = models.BooleanField(default=False)  #remove
     start_of_judging = models.DateTimeField(default=timezone.now)
     end_of_judging = models.DateTimeField(default=timezone.now)
     result_announcement_date = models.DateTimeField(default=timezone.now)
