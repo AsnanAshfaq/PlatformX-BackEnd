@@ -73,7 +73,6 @@ class Criteria(models.Model):
     title = models.CharField(max_length=25)
     description = models.TextField()
 
-
 class Sponsor(models.Model):
 
     def get_image_path(self, filename):

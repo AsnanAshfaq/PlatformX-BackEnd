@@ -137,6 +137,7 @@ def get_user_hackathons(request):
         hackathon_serializer = GetUserHackathonsSerializer(hackathon_query, many=True)
         return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
     except:
+
         response["error"] = "Error occurred while getting hackathon."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 

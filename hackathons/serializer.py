@@ -8,7 +8,7 @@ from django.utils.timezone import now
 class UserProfileImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfileImage
-        fields = "__all__"
+        fields = ["id", "metadata", "path"]
 
 
 class UserFollowersSerializer(serializers.ModelSerializer):
@@ -131,6 +131,27 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
 class GetUserHackathonsSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(required=False, source='user')
 
+    participants = serializers.SerializerMethodField()
+    total_prize = serializers.SerializerMethodField('calculate_prize')
+    days_left = serializers.SerializerMethodField()
+
     class Meta:
         model = Hackathon
-        fields = ["id", "title", "description", "thumbnail_image", "organization", "created_at", "updated_at"]
+        fields = ["id", "title", "tag_line", "days_left", "participants", "total_prize", "logo_image", "theme_tags",
+                  "organization", "created_at",
+                  "updated_at"]
+
+    def get_participants(self, obj):
+        participants_length = Participant.objects.filter(hackathon=obj)
+        return len(list(participants_length))
+
+    def calculate_prize(self, obj):
+        prizes = Prize.objects.filter(hackathon=obj).values('value')
+        total_prize = 0
+        for _, p in enumerate(prizes):
+            total_prize += p['value']
+        return total_prize
+
+    def get_days_left(self, obj):
+        return (obj.end_of_hackathon - now()).days
+
