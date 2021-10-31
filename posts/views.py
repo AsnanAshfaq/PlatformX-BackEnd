@@ -1,3 +1,5 @@
+import random
+
 from .serializer import (PostSerializer, CommentSerializer, ImageSerializer)
 from .models import Comment, Post, Image, Share
 from rest_framework.permissions import IsAuthenticated
@@ -8,6 +10,7 @@ from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.pagination import PageNumberPagination
 from posts.share.serializer import ShareSerializer, GetAllSharesSerializer
+from .FCMManager import push_notification
 
 
 # Create post
@@ -138,6 +141,7 @@ def delete_post(request):
 def get_user_posts(request):
     response = {}
     post_serializer = ""
+    push_notification()
     try:
         post_query = Post.objects.filter(user=request.user).order_by('-created_at')
         post_serializer = PostSerializer(post_query, many=True, context={"request": request})

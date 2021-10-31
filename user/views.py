@@ -164,6 +164,24 @@ def signin(request):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
+@permission_classes([IsAuthenticated])
+@api_view(['POST'])
+def signout(request):
+    response = {}
+    try:
+        # get access and refresh token
+        refresh_token = request.data['refresh_token']
+        access_token = request.data['access_token']
+        token = RefreshToken(refresh_token)
+        print("Token is", token)
+        token.blacklist()
+        response['success'] = "Signing out."
+        return Response(data=response, status=status.HTTP_201_CREATED)
+    except:
+        response['error'] = "An error occurred while signing out."
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
 # --NOT DONE YET--
 
 

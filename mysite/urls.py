@@ -20,6 +20,7 @@ from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
+from fcm_django.api.rest_framework import FCMDeviceAuthorizedViewSet
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -31,6 +32,8 @@ urlpatterns = [
     path('user/', include('user.urls')),
     path('chat/', include('chat.urls')),
     path('payment/', include('payment.urls')),
+    # firebase cloud messaging route
+    path('devices/', FCMDeviceAuthorizedViewSet.as_view({'post': 'create'}), name='create_fcm_device'),
     # path('accounts/',include('django.contrib.auth.urls')),
     # path('api-token-auth/', views.obtain_auth_token, name='api-tokn-auth'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
