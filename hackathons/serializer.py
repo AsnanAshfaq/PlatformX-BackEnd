@@ -149,7 +149,7 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
         return (obj.end_of_hackathon - now()).days
 
 
-class CreateHackathonSerializer(serializers.ModelSerializer):
+class CreateEditHackathonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hackathon
         fields = '__all__'
@@ -160,7 +160,16 @@ class CreateHackathonSerializer(serializers.ModelSerializer):
         return hackathon
 
     def update(self, instance, validated_data):
-        # instance.email = validated_data.get('email', instance.email)
-        # instance.content = validated_data.get('content', instance.content)
-        # instance.created = validated_data.get('created', instance.created)
+        instance.title = validated_data.get('title', instance.title)
+        instance.tag_line = validated_data.get('tag_line', instance.tag_line)
+        instance.description = validated_data.get('description', instance.description)
+        instance.theme_tags = validated_data.get('theme_tags', instance.theme_tags)
+        instance.contact_email = validated_data.get('contact_email', instance.contact_email)
+        instance.is_team_required = validated_data.get('is_team_required', instance.is_team_required)
+        instance.min_team_members = validated_data.get('min_team_members', instance.min_team_members)
+        instance.max_team_members = validated_data.get('max_team_members', instance.max_team_members)
+        instance.rules = validated_data.get('rules', instance.rules)
+        instance.resource = validated_data.get('resource', instance.resource)
+        instance.submission_requirement = validated_data.get('submission_requirement', instance.submission_requirement)
+        instance.save()
         return instance

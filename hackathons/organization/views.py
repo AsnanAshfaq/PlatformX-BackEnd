@@ -4,8 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from user.models import User, Organization
 from hackathons.models import Hackathon
-from hackathons.serializer import GetUserHackathonsSerializer, CreateHackathonSerializer
-from rest_framework.exceptions import ValidationError
+from hackathons.serializer import GetUserHackathonsSerializer, CreateEditHackathonSerializer
 
 
 # create hackathon
@@ -16,24 +15,45 @@ def create_hackathon(request):
 
     try:
 
-        # get organiztion model object
+        # get organization model object
         organization = Organization.objects.get(uuid=request.user)
-
-        serializer = CreateHackathonSerializer(data=request.data, context={"user": organization})
-
+        serializer = CreateEditHackathonSerializer(data=request.data, context={"user": organization})
         if serializer.is_valid():
-            print("Serializer is valid", )
             hackathon = serializer.save()
+            response["hackathon_id"] = hackathon.id
             response["success"] = "Hackathon has been created"
             return Response(data=response, status=status.HTTP_201_CREATED)
-        response["error"] = "Error while creating hackathon"
+        response["error"] = "Error occurred while creating hackathon"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except():
-        response["error"] = "Error while creating hackathon"
+        response["error"] = "Error occurred while creating hackathon"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
-# get hackathons of a single organization
+# edit hackathon
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def edit_hackathon(request):
+    response = {}
+    try:
+        # get hackathon id
+        hackathon_query = Hackathon.objects.get(id=request.data["hackathon_id"])
+        # get organization model object
+        organization = Organization.objects.get(uuid=request.user)
+        serializer = CreateEditHackathonSerializer(hackathon_query, data=request.data, context={"user": organization})
+        if serializer.is_valid():
+            hackathon = serializer.save()
+            response["hackathon_id"] = hackathon.id
+            response["success"] = "Hackathon has been edited"
+            return Response(data=response, status=status.HTTP_200_OK)
+        response["error"] = "Error occurred while editing hackathon"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except():
+        response["error"] = "Error occurred while editing hackathon"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# get hackathons of an organization
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_organization_hackathons(request):
