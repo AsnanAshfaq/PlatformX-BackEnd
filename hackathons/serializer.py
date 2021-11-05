@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Hackathon, Judge, Prize, Sponsor, Criteria, Participant
+from .models import Hackathon, Judge, Prize, Participant, JudgingCriteria
 from user.serializer import UserSerializer
 from user.models import User, Organization, ProfileImage, BackgroundImage, Follower, Student
 from django.utils.timezone import now
@@ -49,13 +49,7 @@ class GetParticipantSerializer(serializers.ModelSerializer):
 
 class CriteriaSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Criteria
-        fields = "__all__"
-
-
-class SponsorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Sponsor
+        model = JudgingCriteria
         fields = "__all__"
 
 
@@ -86,7 +80,6 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
 
 class HackathonSerializer(serializers.ModelSerializer):
-    sponsors = SponsorSerializer(many=True, required=False)
     judges = JudgeSerializer(many=True)
     prizes = PrizeSerializer(many=True)
     criteria = CriteriaSerializer(many=True)
@@ -109,7 +102,7 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
         model = Hackathon
         fields = ["id", "title", "tag_line", "description", "theme_tags", "start_of_hackathon",
                   "end_of_hackathon",
-                  "prize_currency", "total_prize", "participants", "days_left", "thumbnail_image", "organization",
+                  "prize_currency", "total_prize", "participants", "days_left", "organization",
                   "created_at",
                   "updated_at"]
 
@@ -155,3 +148,19 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
     def get_days_left(self, obj):
         return (obj.end_of_hackathon - now()).days
 
+
+class CreateHackathonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hackathon
+        fields = '__all__'
+
+    def create(self, validated_data):
+        validated_data["user"] = self.context["user"]
+        hackathon = Hackathon.objects.create(**validated_data)
+        return hackathon
+
+    def update(self, instance, validated_data):
+        # instance.email = validated_data.get('email', instance.email)
+        # instance.content = validated_data.get('content', instance.content)
+        # instance.created = validated_data.get('created', instance.created)
+        return instance

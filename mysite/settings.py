@@ -51,16 +51,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.postgres',
     'livereload',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'rest_framework_simplejwt.token_blacklist',
     'django.contrib.staticfiles',
     'channels'
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.TokenAuthentication',
+    # ],
     # Dont include permission classes
     # as all the views handle permission itself
     # 'DEFAULT_PERMISSION_CLASSES': [

@@ -173,9 +173,8 @@ def signout(request):
         refresh_token = request.data['refresh_token']
         access_token = request.data['access_token']
         token = RefreshToken(refresh_token)
-        print("Token is", token)
         token.blacklist()
-        response['success'] = "Signing out."
+        response['success'] = "Successfully signing out."
         return Response(data=response, status=status.HTTP_201_CREATED)
     except:
         response['error'] = "An error occurred while signing out."

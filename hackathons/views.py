@@ -75,30 +75,6 @@ def get_hackathon(request, id):
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
-# register hackathon
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def register(request, id):
-    try:
-        student = User.objects.get(email=request.user)
-        data = {
-            "id": student.id,
-            "hackathon": id
-        }
-        response = {}
-        participant_serializer = RegisterParticipantSerializer(data=data)
-        if participant_serializer.is_valid():
-            participant_serializer.save()
-            response['success'] = "Registration Successful"
-            return Response(data=response, status=status.HTTP_201_CREATED)
-        else:
-            response['error'] = "Error occurred while registering for the hackathon"
-            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
-    except:
-        response['error'] = "Bad request"
-        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
-
-
 # searching hackathon
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -126,20 +102,6 @@ def search_hackathon(request):
     #     return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
 
 
-# get hackathons of a single user
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def get_user_hackathons(request):
-    response = {}
-    try:
-        user = User.objects.get(email=request.user)
-        hackathon_query = Hackathon.objects.filter(user=user.id).order_by('-created_at')
-        hackathon_serializer = GetUserHackathonsSerializer(hackathon_query, many=True)
-        return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
-    except:
-
-        response["error"] = "Error occurred while getting hackathon."
-        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
 # get all participants of a single hackathon
@@ -173,3 +135,4 @@ def search_participants(request, id):
 
     response['error'] = "Nothing Found"
     return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
