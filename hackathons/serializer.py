@@ -130,13 +130,14 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hackathon
-        fields = ["id", "title", "tag_line", "days_left", "participants", "total_prize", "logo_image", "theme_tags",
-                  "organization", "created_at",
-                  "updated_at"]
+        fields = ["id", "title", "tag_line", "theme_tags", "logo_image", "organization",
+                  "total_prize", "participants", "days_left", "saved_type", "created_at", "updated_at"]
 
     def get_participants(self, obj):
         participants_length = Participant.objects.filter(hackathon=obj)
-        return len(list(participants_length))
+        if len(list(participants_length)) > 0:
+            return len(list(participants_length))
+        return 0
 
     def calculate_prize(self, obj):
         prizes = Prize.objects.filter(hackathon=obj).values('value')
@@ -146,7 +147,9 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
         return total_prize
 
     def get_days_left(self, obj):
-        return (obj.end_of_hackathon - now()).days
+        print(obj.end_date_of_hackathon)
+        # return (obj.end_date_of_hackathon - now()).days
+        return now()
 
 
 class CreateEditHackathonSerializer(serializers.ModelSerializer):
@@ -160,6 +163,7 @@ class CreateEditHackathonSerializer(serializers.ModelSerializer):
         return hackathon
 
     def update(self, instance, validated_data):
+        # general fields
         instance.title = validated_data.get('title', instance.title)
         instance.tag_line = validated_data.get('tag_line', instance.tag_line)
         instance.description = validated_data.get('description', instance.description)
@@ -171,5 +175,27 @@ class CreateEditHackathonSerializer(serializers.ModelSerializer):
         instance.rules = validated_data.get('rules', instance.rules)
         instance.resource = validated_data.get('resource', instance.resource)
         instance.submission_requirement = validated_data.get('submission_requirement', instance.submission_requirement)
+
+        # media fields
+        instance.logo_image = validated_data.get('logo_image', instance.logo_image)
+        instance.background_image = validated_data.get('background_image', instance.background_image)
+        instance.allowed_file_types = validated_data.get('allowed_file_types', instance.allowed_file_types)
+        instance.is_video_required = validated_data.get('is_video_required', instance.is_video_required)
+        instance.promotional_video = validated_data.get('promotional_video', instance.promotional_video)
+
+        # schedule fields
+        instance.start_date_of_hackathon = validated_data.get('start_date_of_hackathon',
+                                                              instance.start_date_of_hackathon)
+        instance.start_time_of_hackathon = validated_data.get('start_time_of_hackathon',
+                                                              instance.start_time_of_hackathon)
+        instance.end_date_of_hackathon = validated_data.get('end_date_of_hackathon', instance.end_date_of_hackathon)
+        instance.end_time_of_hackathon = validated_data.get('end_time_of_hackathon', instance.end_time_of_hackathon)
+        instance.result_announcement_date = validated_data.get('result_announcement_date',
+                                                               instance.result_announcement_date)
+        instance.final_reminder = validated_data.get('final_reminder', instance.final_reminder)
+
+        # saved type field
+        instance.saved_type = validated_data.get('saved_type', instance.saved_type)
+
         instance.save()
         return instance

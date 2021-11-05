@@ -12,9 +12,7 @@ from hackathons.serializer import GetUserHackathonsSerializer, CreateEditHackath
 @permission_classes([IsAuthenticated])
 def create_hackathon(request):
     response = {}
-
     try:
-
         # get organization model object
         organization = Organization.objects.get(uuid=request.user)
         serializer = CreateEditHackathonSerializer(data=request.data, context={"user": organization})
@@ -64,6 +62,6 @@ def get_organization_hackathons(request):
         hackathon_serializer = GetUserHackathonsSerializer(hackathon_query, many=True)
         return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
     except:
-
+        print(hackathon_serializer)
         response["error"] = "Error occurred while getting hackathon."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
