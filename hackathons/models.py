@@ -15,6 +15,11 @@ class Hackathon(models.Model):
         ('PUBLISHED', 'PUBLISHED'),
         ('DRAFT', 'DRAFT')
     ]
+    STATUS = [
+        ('Upcoming', 'Upcoming'),
+        ('Open', 'Open'),
+        ('Ended', 'Ended')
+    ]
 
     def get_background_image_path(self, filename):
         return "hackathon" + "/" + str(self.id) + "/" + "background" + "/" + str(self.title) + "-" + str(filename)
@@ -56,6 +61,7 @@ class Hackathon(models.Model):
     final_reminder = models.TextField(default='', blank=True)
 
     saved_type = models.CharField(max_length=10, choices=SAVED_TYPE_CHOICES, default='DRAFT', blank=True)
+    status = models.CharField(max_length=15, choices=STATUS, default='Upcoming', blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

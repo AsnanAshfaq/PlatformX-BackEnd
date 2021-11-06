@@ -16,7 +16,6 @@ def get_workshops(request):
     workshop_serializer = ''
     try:
         workshop_query = Workshop.objects.all()
-
         workshop_serializer = AllWorkshopSerializer(workshop_query, many=True)
         return Response(data=workshop_serializer.data, status=status.HTTP_200_OK)
     except:

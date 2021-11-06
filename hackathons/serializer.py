@@ -3,6 +3,7 @@ from .models import Hackathon, Judge, Prize, Participant, JudgingCriteria
 from user.serializer import UserSerializer
 from user.models import User, Organization, ProfileImage, BackgroundImage, Follower, Student
 from django.utils.timezone import now
+from datetime import datetime
 
 
 class UserProfileImageSerializer(serializers.ModelSerializer):
@@ -80,16 +81,11 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
 
 class HackathonSerializer(serializers.ModelSerializer):
-    judges = JudgeSerializer(many=True)
-    prizes = PrizeSerializer(many=True)
-    criteria = CriteriaSerializer(many=True)
     organization = OrganizationSerializer(required=False, source='user')
-    participant = ParticipantSerializer(many=True)
 
     class Meta:
         model = Hackathon
-        exclude = ["is_video_required", "upload_file_type", "is_public_voting_enable", "start_of_judging",
-                   "end_of_judging", "result_announcement_date", "saved_type", "user"]
+        fields = "__all__"
 
 
 class HackathonBriefSerializer(serializers.ModelSerializer):
@@ -100,10 +96,8 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hackathon
-        fields = ["id", "title", "tag_line", "description", "theme_tags", "start_of_hackathon",
-                  "end_of_hackathon",
-                  "prize_currency", "total_prize", "participants", "days_left", "organization",
-                  "created_at",
+        fields = ["id", "title", "tag_line", "description", "theme_tags", "start_date_of_hackathon",
+                  "end_date_of_hackathon", "total_prize", "participants", "days_left", "organization", "created_at",
                   "updated_at"]
 
     def calculate_prize(self, obj):
@@ -118,7 +112,7 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
         return len(list(participants_length))
 
     def get_days_left(self, obj):
-        return (obj.end_of_hackathon - now()).days
+        return (obj.end_date_of_hackathon - datetime.now().date()).days
 
 
 class GetUserHackathonsSerializer(serializers.ModelSerializer):
@@ -147,9 +141,7 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
         return total_prize
 
     def get_days_left(self, obj):
-        print(obj.end_date_of_hackathon)
-        # return (obj.end_date_of_hackathon - now()).days
-        return now()
+        return (obj.end_date_of_hackathon - datetime.now().date()).days
 
 
 class CreateEditHackathonSerializer(serializers.ModelSerializer):
