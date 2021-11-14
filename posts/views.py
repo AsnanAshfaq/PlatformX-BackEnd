@@ -141,7 +141,7 @@ def delete_post(request):
 def get_user_posts(request):
     response = {}
     post_serializer = ""
-    push_notification()
+    push_notification(user=request.user)
     try:
         post_query = Post.objects.filter(user=request.user).order_by('-created_at')
         post_serializer = PostSerializer(post_query, many=True, context={"request": request})

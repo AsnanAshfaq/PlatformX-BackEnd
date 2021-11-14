@@ -29,11 +29,12 @@ urlpatterns = [
     path('api/', include('posts.urls')),
     path('api/', include('hackathons.urls')),
     path('api/', include('workshop.urls')),
+    path('api/', include('fyp.urls')),
     path('user/', include('user.urls')),
     path('chat/', include('chat.urls')),
     path('payment/', include('payment.urls')),
     # firebase cloud messaging route
-    path('devices/', FCMDeviceAuthorizedViewSet.as_view({'post': 'create'}), name='create_fcm_device'),
+    path('devices/', FCMDeviceAuthorizedViewSet.as_view({'get': 'list'}), name='create_fcm_device'),
     # path('accounts/',include('django.contrib.auth.urls')),
     # path('api-token-auth/', views.obtain_auth_token, name='api-tokn-auth'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -14,9 +14,14 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from firebase_admin import initialize_app
+import firebase_admin
+from firebase_admin import credentials
 
 # initialize firebase app
 FIREBASE_APP = initialize_app()
+# setting path to json file
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:\PlatformX BackEnd\mysite\platformx-330220-2cc6d71f075b.json"
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,6 +43,7 @@ INSTALLED_APPS = [
     'posts',
     'hackathons',
     'workshop',
+    'fyp',
     'user',
     'chat',
     'payment',
