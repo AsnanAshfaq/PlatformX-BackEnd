@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-from user.models import Organization, Student
+from user.models import Organization, Student, User
 from django.contrib.postgres.fields import ArrayField
 from datetime import date
 
@@ -9,7 +9,7 @@ from datetime import date
 class FYP(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user = models.ForeignKey(Organization, related_name="fyp", on_delete=models.CASCADE)
+    user = models.ForeignKey('user.Organization', related_name="fyp", on_delete=models.CASCADE)
     name = models.CharField(max_length=40)
     description = models.TextField()
     category = ArrayField(models.TextField(), default=list)

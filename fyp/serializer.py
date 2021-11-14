@@ -1,6 +1,29 @@
 from rest_framework import serializers
 from .models import FYP, Participant
 import datetime
+from user.models import Organization, ProfileImage, User
+
+
+class ProfileImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ["id", "metadata", "path"]
+        model = ProfileImage
+
+
+class UserSerializer(serializers.ModelSerializer):
+    profile_image = ProfileImageSerializer(source='user_profile_image')
+
+    class Meta:
+        model = User
+        fields = ["profile_image"]
+
+
+class OrganizationSerializer(serializers.ModelSerializer):
+    user = UserSerializer(source='uuid')
+
+    class Meta:
+        model = Organization
+        fields = ['uuid', 'name', 'user']
 
 
 class CreateFYPSerializer(serializers.ModelSerializer):
@@ -18,9 +41,10 @@ class ParticipantSerializer(serializers.ModelSerializer):
 class GetAllFYPSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
+    organization = OrganizationSerializer(source='user')
 
     class Meta:
-        fields = ["id", "user", "name", "description", "category", "technologies", "outcomes", "team_members",
+        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes", "team_members",
                   "end_date", "participants", "days_left", "created_at", "updated_at"]
         model = FYP
 
@@ -29,5 +53,4 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
         return len(list(participants_length))
 
     def get_days_left(self, obj):
-        print((obj.end_date - datetime.date.today()).days)
         return (obj.end_date - datetime.date.today()).days

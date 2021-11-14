@@ -34,6 +34,5 @@ def get_all_fyps(request):
         serializer = GetAllFYPSerializer(fyp_query, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
-        print(serializer)
         response['error'] = "Error occurred while fetching FYP's"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
