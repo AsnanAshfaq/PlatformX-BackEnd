@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import AllWorkshopSerializer
+from .serializer import AllWorkshopSerializer, GetWorkshopSerializer
 from .models import Workshop
 from django.db.models import Q
 
@@ -21,6 +21,20 @@ def get_workshops(request):
     except:
         response['error'] = "Error while getting workshops"
         print(workshop_serializer.data)
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# get a single workshop
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_workshop(request, id):
+    response = {}
+    try:
+        fyp_query = Workshop.objects.get(id=id)
+        serializer = GetWorkshopSerializer(fyp_query)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    except:
+        response['error'] = "Error occurred while fetching workshop"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 

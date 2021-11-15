@@ -38,6 +38,15 @@ class ParticipantSerializer(serializers.ModelSerializer):
         model = Participant
 
 
+class CreateFYPSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = "__all__"
+        model = FYP
+
+    def create(self, validated_data):
+        return FYP.objects.create(**validated_data)
+
+
 class GetAllFYPSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
@@ -45,6 +54,41 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes", "team_members",
+                  "end_date", "participants", "days_left", "created_at", "updated_at"]
+        model = FYP
+
+    def get_participants(self, obj):
+        participants_length = Participant.objects.filter(fyp=obj)
+        return len(list(participants_length))
+
+    def get_days_left(self, obj):
+        return (obj.end_date - datetime.date.today()).days
+
+
+class GetFYPSerializer(serializers.ModelSerializer):
+    participants = serializers.SerializerMethodField()
+    days_left = serializers.SerializerMethodField()
+    organization = OrganizationSerializer(source='user')
+
+    class Meta:
+        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes", "team_members",
+                  "end_date", "participants", "days_left", "created_at", "updated_at"]
+        model = FYP
+
+    def get_participants(self, obj):
+        participants_length = Participant.objects.filter(fyp=obj)
+        return len(list(participants_length))
+
+    def get_days_left(self, obj):
+        return (obj.end_date - datetime.date.today()).days
+
+
+class GetOrganizationSerializer(serializers.ModelSerializer):
+    participants = serializers.SerializerMethodField()
+    days_left = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ["id", "name", "description", "category", "technologies", "outcomes", "team_members",
                   "end_date", "participants", "days_left", "created_at", "updated_at"]
         model = FYP
 
