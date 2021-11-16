@@ -6,6 +6,35 @@ from rest_framework import status
 from .serializer import AllWorkshopSerializer, GetWorkshopSerializer
 from .models import Workshop
 from django.db.models import Q
+from user.models import User, Organization
+
+
+# create workshop
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_workshop(request):
+    response = {}
+    try:
+        return Response(data=response, status=status.HTTP_201_CREATED)
+    except:
+        response['error'] = "Error while getting workshops"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+# start the workshop
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def start_workshop(request):
+    response = {}
+    # check if the user making the request is organization or not
+    user_id = User.objects.get(email=request.user)
+    organization_query = Organization.objects.filter(uuid=user_id)
+    if organization_query:
+
+        return Response(data=response, status=status.HTTP_201_CREATED)
+    # user is not valid
+    response['error'] = "Invalid User"
+    return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 # get all the workshops
@@ -13,14 +42,12 @@ from django.db.models import Q
 @permission_classes([IsAuthenticated])
 def get_workshops(request):
     response = {}
-    workshop_serializer = ''
     try:
         workshop_query = Workshop.objects.all()
         workshop_serializer = AllWorkshopSerializer(workshop_query, many=True)
         return Response(data=workshop_serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error while getting workshops"
-        print(workshop_serializer.data)
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
