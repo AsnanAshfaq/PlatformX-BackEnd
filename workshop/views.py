@@ -7,6 +7,9 @@ from .serializer import AllWorkshopSerializer, GetWorkshopSerializer
 from .models import Workshop
 from django.db.models import Q
 from user.models import User, Organization
+import requests
+
+from .zoom import Zoom
 
 
 # create workshop
@@ -30,8 +33,13 @@ def start_workshop(request):
     user_id = User.objects.get(email=request.user)
     organization_query = Organization.objects.filter(uuid=user_id)
     if organization_query:
-
-        return Response(data=response, status=status.HTTP_201_CREATED)
+        zoom = Zoom(workshop=request.data['id'])
+        value = zoom.create_meeting()
+        if value == 1:
+            response['success'] = "Meeting created successfully"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        response['error'] = "Error occurred while creating meeting"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     # user is not valid
     response['error'] = "Invalid User"
     return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
