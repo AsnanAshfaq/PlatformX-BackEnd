@@ -7,9 +7,8 @@ from .serializer import AllWorkshopSerializer, GetWorkshopSerializer
 from .models import Workshop
 from django.db.models import Q
 from user.models import User, Organization
-import requests
-
-from .zoom import Zoom
+from .zoom import ZoomAPI
+from .mail import workshop_participant_invitation_mail
 
 
 # create workshop
@@ -33,11 +32,14 @@ def start_workshop(request):
     user_id = User.objects.get(email=request.user)
     organization_query = Organization.objects.filter(uuid=user_id)
     if organization_query:
-        zoom = Zoom(workshop=request.data['id'])
-        value = zoom.create_meeting()
-        if value == 1:
+        zoom = ZoomAPI(workshop=request.data['id'])
+        if zoom.create_meeting() == 1:
+            # send mail to all the participants
+            zoom_response = zoom.get_response()
             response['success'] = "Meeting created successfully"
-            return Response(data=response, status=status.HTTP_201_CREATED)
+            return Response(data=zoom_response(), status=status.HTTP_201_CREATED)
+
+        workshop_participant_invitation_mail()
         response['error'] = "Error occurred while creating meeting"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     # user is not valid

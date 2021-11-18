@@ -3,9 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 import requests
 from user.models import Organization, User
+import random, string
 
 
-class Zoom:
+class ZoomAPI:
     token = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6ImNMVGJRSXJFUzdxQjNVRENkSl9KM3ciLCJleHAiOjE2Njg2OTM5NjAsImlhdCI6MTYzNzE1MjYwN30.e03BZkDTs6mEtR9Fc2ZSAX4UucFirLkLupSmi6VmJCU'
     base_url = "https://api.zoom.us/v2/"
 
@@ -16,7 +17,6 @@ class Zoom:
         "type": 1,  # for now
         # "start_time": "2020-06-26T14:30:00Z",
         # "duration": 60,
-        "password": "FCXq39Bctx",
         # "recurrence": {
         #     "type": "1",
         #     "repeat_interval": "1",
@@ -64,12 +64,14 @@ class Zoom:
 
     def create_meeting(self):
         self.body['topic'] = self.get_workshop_name()
+        self.body['password'] = self.generate_password()
         self.body["start_time"] = self.get_workshop_start_time()
         self.body['schedule_for'] = self.get_organization_email()
         self.body['agenda'] = self.get_workshop_description()
-        response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
-        if response.status_code == 201:
-            return 1
+        # response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
+        # if response.status_code == 201:
+        #     self.set_response(json=response.json)
+        #     return 1
         return 0
 
     def get_workshop_name(self):
@@ -88,12 +90,21 @@ class Zoom:
         query = self.workshop_query()
         return query.description
 
+    def set_response(self, json):
+        self.response = json
+
+    def get_response(self):
+        return self.response
+
     def workshop_query(self):
         workshop_query = Workshop.objects.get(id=self.workshop)
         if workshop_query:
             return workshop_query
         else:
             self.reject_request()
+
+    def generate_password(self):
+        return "".join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=10))
 
     def reject_request(self):
         return 0
