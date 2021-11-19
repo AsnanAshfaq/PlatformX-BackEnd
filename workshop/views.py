@@ -8,7 +8,7 @@ from .models import Workshop
 from django.db.models import Q
 from user.models import User, Organization
 from .zoom import ZoomAPI
-from .mail import workshop_participant_invitation_mail
+from .mail import Mail
 
 
 # create workshop
@@ -34,12 +34,14 @@ def start_workshop(request):
     if organization_query:
         zoom = ZoomAPI(workshop=request.data['id'])
         if zoom.create_meeting() == 1:
-            # send mail to all the participants
             zoom_response = zoom.get_response()
+            mail = Mail(workshop=request.data['id'], data=zoom_response)
+
+            # send mail to all the participants
+            mail.send_mail_to_attendees()
+
             response['success'] = "Meeting created successfully"
             return Response(data=zoom_response(), status=status.HTTP_201_CREATED)
-
-        workshop_participant_invitation_mail()
         response['error'] = "Error occurred while creating meeting"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     # user is not valid

@@ -7,7 +7,7 @@ import random, string
 
 
 class ZoomAPI:
-    token = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6ImNMVGJRSXJFUzdxQjNVRENkSl9KM3ciLCJleHAiOjE2Njg2OTM5NjAsImlhdCI6MTYzNzE1MjYwN30.e03BZkDTs6mEtR9Fc2ZSAX4UucFirLkLupSmi6VmJCU'
+    token = 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6ImNMVGJRSXJFUzdxQjNVRENkSl9KM3ciLCJleHAiOjE2Njg4NjM3NjAsImlhdCI6MTYzNzMyMjM4OH0.M-Cx75XFz3tBdBw4vzqvt5jF1E3KgnTQNZZdC_GWBgg'
     base_url = "https://api.zoom.us/v2/"
 
     headers = {
@@ -36,8 +36,8 @@ class ZoomAPI:
             "mute_upon_entry": True,
             "watermark": False,
             "use_pmi": False,
-            "approval_type": 1,  # manual approval
-            "registration_type": 1,  # attendees register once and can attend any meeting occurence
+            "approval_type": 1,  # manual approval of registrants
+            "registration_type": 1,  # attendees register once and can attend any meeting occurrence
             "audio": "both",  # telephony and voip
             "auto_recording": "none",
             "alternative_hosts": "",  # add email address of the manager of the meeting
@@ -46,16 +46,11 @@ class ZoomAPI:
             "contact_name": "Asnan",  # contact name for meeting registration
             "contact_email": "18asnan@gmail.com",  # contact email address for meeting registration
             "registrants_email_notification": True,
-            # send registrants email address notifications about their registration approval
             "registrants_confirmation_email": True,  # sends registrants an email confirmation
             "meeting_authentication": False,
             "authentication_option": "",
             "authentication_domains": "",
-            # "authentication_exception": ["Asnan", "18asnan@gmail.com"],
-            # list of participants who can join by passing meeting authenticaion (for workshop managers)
-            # it will contain email of the manager of the workshop
             "alternative_hosts_email_notification": ""  # add email address of the manager of the workshop
-
         },
     }
 
@@ -68,10 +63,10 @@ class ZoomAPI:
         self.body["start_time"] = self.get_workshop_start_time()
         self.body['schedule_for'] = self.get_organization_email()
         self.body['agenda'] = self.get_workshop_description()
-        # response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
-        # if response.status_code == 201:
-        #     self.set_response(json=response.json)
-        #     return 1
+        response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
+        if response.status_code == 201:
+            self.set_response(json=response.json)
+            return 1
         return 0
 
     def get_workshop_name(self):
@@ -84,6 +79,7 @@ class ZoomAPI:
 
     def get_organization_email(self):
         workshop_query = self.workshop_query()
+        user = User.objects.get_by_natural_key(workshop_query.user.uuid)
         return "18asnan@gmail.com"
 
     def get_workshop_description(self):
