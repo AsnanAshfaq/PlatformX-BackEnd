@@ -13,7 +13,39 @@ class Mail:
         self.data = data()
 
     def send_mail_to_attendees(self):
-        msg_html = render_to_string('workshop_join_invitation_mail.html',
+        msg_html = render_to_string('workshop_participant_invitation_mail.html',
+                                    {'topic': self.data['topic'], 'agenda': self.data['agenda'],
+                                     'join_url': self.data['join_url'], 'password': self.data['password'],
+                                     'contact_email': self.data['settings']['contact_email']})
+
+        # get participants list
+        attendees_mail = self.get_attendees_mail()
+        send_mail(
+            subject="Workshop invitation",
+            message="Workshop invitation",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=attendees_mail,
+            html_message=msg_html,
+        )
+
+    def send_mail_to_speaker(self):
+        msg_html = render_to_string('workshop_speaker_invitation_mail.html',
+                                    {'topic': self.data['topic'], 'agenda': self.data['agenda'],
+                                     'join_url': self.data['join_url'], 'password': self.data['password'],
+                                     'contact_email': self.data['settings']['contact_email']})
+
+        # get participants list
+        attendees_mail = self.get_attendees_mail()
+        send_mail(
+            subject="Workshop invitation",
+            message="Workshop invitation",
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=attendees_mail,
+            html_message=msg_html,
+        )
+
+    def send_mail_to_manager(self):
+        msg_html = render_to_string('workshop_manager_invitation_mail.html',
                                     {'topic': self.data['topic'], 'agenda': self.data['agenda'],
                                      'join_url': self.data['join_url'], 'password': self.data['password'],
                                      'contact_email': self.data['settings']['contact_email']})

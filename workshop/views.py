@@ -36,10 +36,8 @@ def start_workshop(request):
         if zoom.create_meeting() == 1:
             zoom_response = zoom.get_response()
             mail = Mail(workshop=request.data['id'], data=zoom_response)
-
             # send mail to all the participants
             mail.send_mail_to_attendees()
-
             response['success'] = "Meeting created successfully"
             return Response(data=zoom_response(), status=status.HTTP_201_CREATED)
         response['error'] = "Error occurred while creating meeting"
@@ -82,7 +80,6 @@ def get_workshop(request, id):
 @permission_classes([IsAuthenticated])
 def search_workshop(request):
     response = {}
-
     if request.GET['q']:
         workshop_search_string = request.GET['q']
         workshop_query = Workshop.objects.filter(

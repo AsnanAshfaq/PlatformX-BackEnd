@@ -44,7 +44,7 @@ class ZoomAPI:
             "close_registration": True,  # close registration after event date
             "waiting_room": True,  # enable waiting room
             "contact_name": "Asnan",  # contact name for meeting registration
-            "contact_email": "18asnan@gmail.com",  # contact email address for meeting registration
+            # "contact_email": "18asnan@gmail.com",  # contact email address for meeting registration
             "registrants_email_notification": True,
             "registrants_confirmation_email": True,  # sends registrants an email confirmation
             "meeting_authentication": False,
@@ -62,6 +62,7 @@ class ZoomAPI:
         self.body['password'] = self.generate_password()
         self.body["start_time"] = self.get_workshop_start_time()
         self.body['schedule_for'] = self.get_organization_email()
+        self.body['contact_email'] = self.get_organization_email()
         self.body['agenda'] = self.get_workshop_description()
         response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
         if response.status_code == 201:
@@ -80,7 +81,7 @@ class ZoomAPI:
     def get_organization_email(self):
         workshop_query = self.workshop_query()
         user = User.objects.get_by_natural_key(workshop_query.user.uuid)
-        return "18asnan@gmail.com"
+        return user.email
 
     def get_workshop_description(self):
         query = self.workshop_query()
