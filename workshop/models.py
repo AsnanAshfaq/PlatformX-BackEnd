@@ -17,7 +17,7 @@ class Workshop(models.Model):
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Organization, related_name="workshop", on_delete=models.CASCADE)
     topic = models.CharField(max_length=60, null=False, blank=False)
-    description = models.TextField(max_length=255, blank=True, )
+    description = models.TextField(blank=True)
     poster = models.ImageField(upload_to=get_workshop_image_path, default='')
     take_away = ArrayField(models.TextField(), default=list)
     event_date = models.DateField(default=datetime.date.today)
@@ -25,7 +25,7 @@ class Workshop(models.Model):
     end_time = models.TimeField(default=datetime.time, )
     # meeting_link = models.URLField()
     is_paid = models.BooleanField(default=False)
-    charges = models.IntegerField()
+    charges = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

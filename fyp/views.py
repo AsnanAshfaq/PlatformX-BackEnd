@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from user.models import User
+from user.models import User, Organization
 from .models import Participant, FYP
 from .serializer import ParticipantSerializer, CreateFYPSerializer, GetAllFYPSerializer, GetFYPSerializer, \
     GetOrganizationSerializer
@@ -17,7 +17,6 @@ from .serializer import ParticipantSerializer, CreateFYPSerializer, GetAllFYPSer
 def create_fyp(request):
     response = {}
     user = User.objects.get(email=request.user)
-
     try:
         data = {
             **request.data,
@@ -30,11 +29,33 @@ def create_fyp(request):
             response['id'] = fyp.id
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:
+            print("Error is", serializer.errors)
             response["error"] = "FYP can not be created"
             return Response(response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
+        print("Error is", serializer.errors)
         response["error"] = "FYP can not be created"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_fyp(request):
+    # delete the fyp
+    response = {}
+    try:
+
+        user = User.objects.get_by_natural_key(username=request.user)
+        if user != request.user:  # if user has not hosted the fyp
+            response["error"] = "You do not have the rights to delete this fyp."
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
+        fyp_query = FYP.objects.get(id=request.data['id'])
+        fyp_query.delete()  # delete the fyp
+        response["success"] = "FYP has been deleted"
+        return Response(data=response, status=status.HTTP_200_OK)
+    except:
+        response["error"] = "Error while deleting fyp"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
 # get all fyps

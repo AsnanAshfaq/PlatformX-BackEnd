@@ -50,6 +50,7 @@ class ZoomAPI:
             "meeting_authentication": False,
             "authentication_option": "",
             "authentication_domains": "",
+            "authenticiation_exception": [{"name": "Asnan", "email": "haidershakeel599@gmail.com"}],
             "alternative_hosts_email_notification": ""  # add email address of the manager of the workshop
         },
     }
@@ -59,11 +60,11 @@ class ZoomAPI:
 
     def create_meeting(self):
         self.body['topic'] = self.get_workshop_name()
+        self.body['agenda'] = self.get_workshop_description()
         self.body['password'] = self.generate_password()
         self.body["start_time"] = self.get_workshop_start_time()
         self.body['schedule_for'] = self.get_organization_email()
         self.body['contact_email'] = self.get_organization_email()
-        self.body['agenda'] = self.get_workshop_description()
         response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
         if response.status_code == 201:
             self.set_response(json=response.json)

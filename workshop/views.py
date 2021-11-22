@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from .serializer import AllWorkshopSerializer, GetWorkshopSerializer
-from .models import Workshop
+from rest_framework.parsers import FormParser, MultiPartParser
+from .serializer import AllWorkshopSerializer, GetWorkshopSerializer, CreateEditWorkshopSerializer, \
+    GetWorkshopParticipantSerializer
+from .models import Workshop, Participant
 from django.db.models import Q
 from user.models import User, Organization
 from .zoom import ZoomAPI
@@ -14,12 +16,28 @@ from .mail import Mail
 # create workshop
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
+@parser_classes([FormParser, MultiPartParser])
 def create_workshop(request):
     response = {}
     try:
-        return Response(data=response, status=status.HTTP_201_CREATED)
+        # create workshop
+        user = User.objects.get(email=request.user)
+        data = {
+            **request.data,
+            "user": user
+        }
+        serializer = CreateEditWorkshopSerializer(data=data)
+        if serializer.is_valid():
+            workshop = serializer.save()
+            response['id'] = workshop.id
+            response['success'] = "Workshop has been created"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
+        response['error'] = "Error while creating workshop"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
-        response['error'] = "Error while getting workshops"
+        print(serializer.errors)
+        response['error'] = "Error while creating workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
@@ -87,3 +105,20 @@ def search_workshop(request):
             '-created_at')
         workshop_serializer = AllWorkshopSerializer(workshop_query, many=True, context={"request": request})
         return Response(data=workshop_serializer.data, status=status.HTTP_200_OK)
+
+
+# get participants of the workshop
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_participants(request, id):
+    response = {}
+    print("Id is", id)
+    user = User.objects.get_by_natural_key(username=request.user)
+    if user != request.user:  # if user has not hosted the fyp
+        response["error"] = "Invalid User Type."
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
+
+    participant_query = Participant.objects.filter(workshop=id)
+    serializer = GetWorkshopParticipantSerializer(participant_query, many=True)
+
+    return Response(data=serializer.data, status=status.HTTP_200_OK)
