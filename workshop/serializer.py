@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Workshop, Participant, Speaker
+from .models import Workshop, Participant, Speaker, PreRequisite
 from user.models import Organization, ProfileImage, User, Student
 # from django.utils.dates import
 from datetime import datetime
@@ -49,7 +49,13 @@ class StudentSerializer(serializers.ModelSerializer):
 class SpeakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Speaker
-        fields = ["name", "email"]
+        fields = ["name", "email", "image", "about"]
+
+
+class PreRequisiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PreRequisite
+        fields = ["title", "description"]
 
 
 class CreateEditWorkshopSerializer(serializers.ModelSerializer):
@@ -90,13 +96,15 @@ class GetWorkshopSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(source='user')
     days_left = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    prerequisites = PreRequisiteSerializer(required=False, many=True, source='workshop_prerequisite')
 
-    # speaker = SpeakerSerializer()
+    speaker = SpeakerSerializer(required=False)
 
     class Meta:
         model = Workshop
         fields = ['id', 'organization', 'topic', "charges", "is_paid", "status", 'description', "take_away",
-                  "days_left", 'speaker', 'poster', 'created_at', 'updated_at']
+                  "days_left", 'speaker', 'prerequisites', 'poster', "event_date", "start_time", "end_time", 'created_at',
+                  'updated_at']
 
     def get_days_left(self, obj):
         if (obj.event_date - datetime.now().date()).days > 0:

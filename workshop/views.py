@@ -41,6 +41,32 @@ def create_workshop(request):
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_workshop(request):
+    response = {}
+
+    try:
+        # find worshop
+        workshop_query = Workshop.objects.get(id=request.data['id'])
+        data = {
+            **request.data,
+        }
+
+        serializer = CreateEditWorkshopSerializer(workshop_query, data=data)
+        if serializer.is_valid():
+            # send mail to all the participants that the workshop has been edited
+            workshop = serializer.save()
+            response['id'] = workshop.id
+            response['success'] = "Workshop has been edited"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        return Response(data=serializer, status=status.HTTP_201_CREATED)
+    except:
+        response['error'] = "Error while updating workshop"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
 # start the workshop
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -113,13 +139,16 @@ def search_workshop(request):
 @permission_classes([IsAuthenticated])
 def get_participants(request, id):
     response = {}
-    print("Id is", id)
     user = User.objects.get_by_natural_key(username=request.user)
     if user != request.user:  # if user has not hosted the fyp
         response["error"] = "Invalid User Type."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
+    try:
 
-    participant_query = Participant.objects.filter(workshop=id)
-    serializer = GetWorkshopParticipantSerializer(participant_query, many=True)
+        participant_query = Participant.objects.filter(workshop=id)
+        serializer = GetWorkshopParticipantSerializer(participant_query, many=True)
 
-    return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    except:
+        response['error'] = "Error while getting workshop participants"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

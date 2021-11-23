@@ -14,7 +14,7 @@ class FYP(models.Model):
     description = models.TextField()
     category = ArrayField(models.TextField(), default=list)
     technologies = ArrayField(models.TextField(), default=list)
-    outcomes = ArrayField(models.TextField(), default=list)
+    outcomes = models.TextField()
     team_members = models.IntegerField(default=1)
     end_date = models.DateField(default=date.today)
     created_at = models.DateTimeField(auto_now_add=True, null=True)

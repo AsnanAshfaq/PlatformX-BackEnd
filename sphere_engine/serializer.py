@@ -9,3 +9,9 @@ class CreateEditTestSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Test.objects.create(**validated_data)
+
+
+class GetTestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        exclude = ["fyp"]

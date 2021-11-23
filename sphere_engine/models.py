@@ -9,10 +9,10 @@ import datetime
 class Test(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    fyp = models.ForeignKey(to=FYP, on_delete=models.CASCADE, related_name="test")
+    fyp = models.OneToOneField(to=FYP, on_delete=models.CASCADE, related_name="test")
     name = models.TextField()
     description = models.TextField()
-    event_date = models.DateField(default=datetime.date.today)
+    end_date = models.DateField(default=datetime.date.today)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

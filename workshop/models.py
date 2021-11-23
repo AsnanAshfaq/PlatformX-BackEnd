@@ -36,7 +36,7 @@ class PreRequisite(models.Model):
     workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE,
                                  related_name="workshop_prerequisite")
     title = models.CharField(max_length=40)
-    list = ArrayField(models.TextField(), default=list)
+    description = models.TextField(blank=True)
 
 
 class Schedule(models.Model):
@@ -62,8 +62,8 @@ class Speaker(models.Model):
 
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE,
-                                 related_name="speaker")
+    workshop = models.OneToOneField(to=Workshop, on_delete=models.CASCADE,
+                                    related_name="speaker")
     name = models.CharField(max_length=50)
     email = models.EmailField()
     image = models.ImageField(upload_to=get_image_path, default="")
