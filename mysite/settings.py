@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'user',
     'chat',
     'payment',
+    'sphere_engine',
     'corsheaders',
     'fcm_django',
     # 'django.contrib.sites',

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Workshop, Participant
+from .models import Workshop, Participant, Speaker
 from user.models import Organization, ProfileImage, User, Student
 # from django.utils.dates import
 from datetime import datetime
@@ -46,6 +46,12 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = ['user']
 
 
+class SpeakerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Speaker
+        fields = ["name", "email"]
+
+
 class CreateEditWorkshopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workshop
@@ -61,29 +67,46 @@ class CreateEditWorkshopSerializer(serializers.ModelSerializer):
 class AllWorkshopSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(source='user')
     days_left = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Workshop
-        fields = ['id', 'organization', 'topic', "charges", "is_paid", 'description', "days_left", 'poster',
+        fields = ['id', 'organization', 'topic', "charges", "is_paid", "status", 'description', "days_left", 'poster',
                   'created_at',
                   'updated_at']
 
     def get_days_left(self, obj):
-        return (obj.event_date - datetime.now().date()).days
+        if (obj.event_date - datetime.now().date()).days > 0:
+            return (obj.event_date - datetime.now().date()).days
+        return 0
+
+    def get_status(self, obj):
+        if (obj.event_date - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
 
 
 class GetWorkshopSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(source='user')
     days_left = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    # speaker = SpeakerSerializer()
 
     class Meta:
         model = Workshop
-        fields = ['id', 'organization', 'topic', "charges", "is_paid", 'description', "days_left", 'poster',
-                  'created_at',
-                  'updated_at']
+        fields = ['id', 'organization', 'topic', "charges", "is_paid", "status", 'description', "take_away",
+                  "days_left", 'speaker', 'poster', 'created_at', 'updated_at']
 
     def get_days_left(self, obj):
-        return (obj.event_date - datetime.now().date()).days
+        if (obj.event_date - datetime.now().date()).days > 0:
+            return (obj.event_date - datetime.now().date()).days
+        return 0
+
+    def get_status(self, obj):
+        if (obj.event_date - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
 
 
 class GetWorkshopParticipantSerializer(serializers.ModelSerializer):

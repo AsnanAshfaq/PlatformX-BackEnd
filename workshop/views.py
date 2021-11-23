@@ -89,6 +89,7 @@ def get_workshop(request, id):
         serializer = GetWorkshopSerializer(fyp_query)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
+        print(serializer)
         response['error'] = "Error occurred while fetching workshop"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
