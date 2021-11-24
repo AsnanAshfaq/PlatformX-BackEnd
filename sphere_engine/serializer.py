@@ -41,13 +41,34 @@ class GetTestSerializer(serializers.ModelSerializer):
         exclude = ["fyp"]
 
 
+class GetAllSubmissionSerializer(serializers.ModelSerializer):
+    student = StudentUserSerializer(source='user')
+    data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Submission
+        fields = ["id", "api_submission_id", "data", "student", "created_at"]
+
+    def get_data(self, obj):
+        data = {}
+        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token=dc64519a0564fd943e20b09564ac9be5'
+        response = requests.get(url)
+        j = response.json()
+        data['executing'] = j['executing']
+        data['result'] = j['result']
+        return data
+
+
 class GetSubmissionSerializer(serializers.ModelSerializer):
     student = StudentUserSerializer(source='user')
     data = serializers.SerializerMethodField()
 
     class Meta:
         model = Submission
-        fields = ["id", "api_submission_id", "data", "fyp", "student", "created_at"]
+        fields = ["id", "api_submission_id", "data", "student", "created_at"]
 
     def get_data(self, obj):
-        return 0
+        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token=dc64519a0564fd943e20b09564ac9be5'
+        response = requests.get(url)
+        j = response.json()
+        return j

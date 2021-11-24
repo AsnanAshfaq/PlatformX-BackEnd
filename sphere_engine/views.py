@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from user.models import User, Organization
 from .models import Test, Submission
 from fyp.models import FYP, Participant
-from .serializer import CreateEditTestSerializer, GetTestSerializer, GetSubmissionSerializer
+from .serializer import CreateEditTestSerializer, GetTestSerializer, GetAllSubmissionSerializer, GetSubmissionSerializer
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -54,12 +54,32 @@ def get_test(request, id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_submission(request, id):
+def get_all_submission(request, id):
     response = {}
     try:
+
         submission_query = Submission.objects.filter(fyp=id)
         if submission_query.exists():
-            serializer = GetSubmissionSerializer(submission_query, many=True)
+            serializer = GetAllSubmissionSerializer(submission_query, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        response['error'] = "Error while getting Submissions"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except:
+        response['error'] = "Error while getting Submissions"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# get single submisson of a fyp
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_submission(request, fypID, submissionID):
+    response = {}
+    try:
+
+        submission_query = Submission.objects.get(fyp=fypID, id=submissionID)
+        if submission_query:
+            serializer = GetSubmissionSerializer(submission_query)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         response['error'] = "Error while getting Submissions"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
