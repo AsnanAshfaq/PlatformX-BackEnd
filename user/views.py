@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from smtplib import SMTPException
 import pyotp
+import requests
 
 
 # Create your views here
@@ -238,3 +239,29 @@ def confirm_password_reset(request):
     except:
         response['error'] = "Error occurred while resetting password"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def bot_linked_in(request):
+    response = {}
+    try:
+        access_token = request.data['token']
+
+        base_url = " https://api.linkedin.com/v2/ugcPosts"
+
+        headers = {
+            "Authorization": access_token
+        }
+
+        response = requests.post(base_url, headers=headers)
+        if response.status_code == 201:
+            response['success'] = "Content has been shared on LinkedIn"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "Error while post on LinkedIn"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+    except:
+        response['error'] = "Error while post on LinkedIn"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

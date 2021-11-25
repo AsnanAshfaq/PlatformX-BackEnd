@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'hackathons',
     'workshop',
     'fyp',
+    'internships',
     'user',
     'chat',
     'payment',

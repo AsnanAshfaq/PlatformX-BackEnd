@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/', include('posts.urls')),
     path('api/', include('hackathons.urls')),
     path('api/', include('workshop.urls')),
+    path('api/', include('internships.urls')),
     path('api/', include('fyp.urls')),
     path('api/', include('sphere_engine.urls')),
     path('user/', include('user.urls')),
