@@ -72,3 +72,12 @@ class GetSubmissionSerializer(serializers.ModelSerializer):
         response = requests.get(url)
         j = response.json()
         return j
+
+
+class CreateSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Submission
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Submission.objects.create(**validated_data)

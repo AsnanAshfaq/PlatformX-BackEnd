@@ -6,7 +6,8 @@ from rest_framework.decorators import api_view, permission_classes
 from user.models import User, Organization
 from .models import Test, Submission
 from fyp.models import FYP, Participant
-from .serializer import CreateEditTestSerializer, GetTestSerializer, GetAllSubmissionSerializer, GetSubmissionSerializer
+from .serializer import CreateEditTestSerializer, GetTestSerializer, GetAllSubmissionSerializer, \
+    GetSubmissionSerializer, CreateSubmissionSerializer
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -34,6 +35,32 @@ def create_test(request):
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
         response['error'] = "Error occurred while creating test"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_submission(request):
+    response = {}
+    submission_id = request.data['submission_id']
+    fyp_id = request.data['fyp_id']
+    try:
+        user = User.objects.get(email=request.user)
+        fyp = FYP.objects.get(id=fyp_id)
+        data = {
+            "fyp": fyp.id,
+            "user": user,
+            "api_submission_id": submission_id
+        }
+        serializer = CreateSubmissionSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            response['success'] = "Your code has been submitted"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        response['error'] = "Error occurred while submitting code"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+    except:
+        response['error'] = "Error occured while submitting code"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
@@ -69,8 +96,7 @@ def get_all_submission(request, id):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
-# get single submisson of a fyp
-
+# get single submission of a fyp
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_submission(request, fypID, submissionID):

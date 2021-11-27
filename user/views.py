@@ -244,24 +244,39 @@ def confirm_password_reset(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def bot_linked_in(request):
-    response = {}
+    res = {}
     try:
         access_token = request.data['token']
 
         base_url = " https://api.linkedin.com/v2/ugcPosts"
 
         headers = {
-            "Authorization": access_token
+            "Authorization": access_token,
+            "X-Restli-Protocol-Version": "2.0.0"
         }
 
-        response = requests.post(base_url, headers=headers)
+        body = {
+            "author": "urn:li:person:suAoshSJqj",
+            "lifecycleState": "PUBLISHED",
+            "specificContent": {
+                "com.linkedin.ugc.ShareContent": {
+                    "shareCommentary": {
+                        "text": "Hello World! I am Asnan's Bot to post on linkedIn and my name is Doxi."
+                    },
+                    "shareMediaCategory": "NONE"
+                }
+            },
+            "visibility": {
+                "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+            }
+        }
+        response = requests.post(base_url, headers=headers,json=body)
         if response.status_code == 201:
-            response['success'] = "Content has been shared on LinkedIn"
+            res['success'] = "Content has been shared on LinkedIn"
             return Response(data=response, status=status.HTTP_201_CREATED)
-
-        response['error'] = "Error while post on LinkedIn"
+        res['error'] = "Error while post on LinkedIn"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
     except:
-        response['error'] = "Error while post on LinkedIn"
+        res['error'] = "Error while post on LinkedIn"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
