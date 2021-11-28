@@ -15,29 +15,6 @@ class ZoomAPI:
     }
     body = {
         "type": 2,  # schedule
-        # "settings": {
-        #     "host_video": True,
-        #     "participant_video": False,
-        #     "cn_meeting": False,
-        #     "in_meeting": False,
-        #     "join_before_host": False,
-        #     "mute_upon_entry": True,
-        #     "watermark": False,
-        #     "use_pmi": False,
-        #     "approval_type": 1,  # manual approval of registrants
-        #     "registration_type": 1,  # attendees register once and can attend any meeting occurrence
-        #     "audio": "both",  # telephony and voip
-        #     "auto_recording": "none",
-        #     "alternative_hosts": "",  # add email address of the manager of the meeting
-        #     "close_registration": True,  # close registration after event date
-        #     "waiting_room": True,  # enable waiting room
-        #     "registrants_email_notification": True,
-        #     "registrants_confirmation_email": True,  # sends registrants an email confirmation
-        #     "meeting_authentication": False,
-        #     "authentication_option": "",
-        #     "authentication_domains": "",
-        #     # "authenticiation_exception": [{"name": "Asnan", "email": "haidershakeel599@gmail.com"}],
-        # },
         "settings": {
             "host_video": True,
             "participant_video": False,
@@ -54,8 +31,6 @@ class ZoomAPI:
             "alternative_hosts": "",  # add email address of the manager of the meeting
             "close_registration": True,  # close registration after event date
             "waiting_room": True,  # enable waiting room
-            # "contact_name": "Asnan",  # contact name for meeting registration
-            # "contact_email": "18asnan@gmail.com",  # contact email address for meeting registration
             "registrants_email_notification": True,
             "registrants_confirmation_email": True,  # sends registrants an email confirmation
             "meeting_authentication": False,
@@ -72,11 +47,6 @@ class ZoomAPI:
         self.response = None
 
     def create_meeting(self):
-        # self.body['password'] = self.generate_password()
-        # self.body["start_time"] = self.time
-        # self.body['timezone'] = "Asia/Tashkent"
-        # self.body['schedule_for'] = self.get_organization_email()
-        # self.body['contact_email'] = self.get_organization_email()
         self.body['topic'] = self.get_internship_name()
         self.body['agenda'] = self.get_internship_description()
         self.body['password'] = self.generate_password()

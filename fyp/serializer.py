@@ -47,6 +47,15 @@ class CreateFYPSerializer(serializers.ModelSerializer):
         return FYP.objects.create(**validated_data)
 
 
+class CreateParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Participant.objects.create(**validated_data)
+
+
 class GetAllFYPSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()

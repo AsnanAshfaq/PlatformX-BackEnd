@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from user.models import User, Organization
 from .models import Participant, FYP
 from .serializer import ParticipantSerializer, CreateFYPSerializer, GetAllFYPSerializer, GetFYPSerializer, \
-    GetOrganizationSerializer
+    GetOrganizationSerializer, CreateParticipantSerializer
 
 
 # Create your views here.
@@ -47,18 +47,18 @@ def delete_fyp(request):
 
         user = User.objects.get_by_natural_key(username=request.user)
         if user != request.user:  # if user has not hosted the fyp
-            response["error"] = "You do not have the rights to delete this fyp."
+            response["error"] = "You do not have the rights to delete this FYP."
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
         fyp_query = FYP.objects.get(id=request.data['id'])
         fyp_query.delete()  # delete the fyp
         response["success"] = "FYP has been deleted"
         return Response(data=response, status=status.HTTP_200_OK)
     except:
-        response["error"] = "Error while deleting fyp"
+        response["error"] = "Error while deleting FYP"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
-# get all fyps
+# get all fyps for students
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_fyps(request):
@@ -98,5 +98,28 @@ def get_organization_fyp(request):
         serializer = GetOrganizationSerializer(fyp_query, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
-        response['error'] = "Error occurred while getting fyps"
+        response['error'] = "Error occurred while getting FYP's"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# apply for fyp
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def apply(request, id):
+    response = {}
+    try:
+        user = User.objects.get(email=request.user)
+        data = {
+            "id": user.id,
+            "fyp": id,
+        }
+        serializer = CreateParticipantSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            response['success'] = "Successfully applied for FYP"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        response['error'] = "Error occurred while applying for FYP"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+    except:
+        response['error'] = "Error occurred while applying for FYP"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
