@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["profile_image"]
+        fields = ["id", "profile_image"]
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -61,9 +61,11 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
     days_left = serializers.SerializerMethodField()
     organization = OrganizationSerializer(source='user')
 
+    is_applied = serializers.SerializerMethodField()
+
     class Meta:
-        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes", "team_members",
-                  "end_date", "participants", "days_left", "created_at", "updated_at"]
+        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes",
+                  "team_members", "end_date", "participants", "is_applied", "days_left", "created_at", "updated_at"]
         model = FYP
 
     def get_participants(self, obj):
@@ -72,6 +74,12 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
 
     def get_days_left(self, obj):
         return (obj.end_date - datetime.date.today()).days
+
+    def get_is_applied(self, obj):
+        user = UserSerializer(self.context['request'].user)
+        if Participant.objects.filter(fyp=obj.id, id=user.data['id']).exists():
+            return True
+        return False
 
 
 class GetFYPSerializer(serializers.ModelSerializer):

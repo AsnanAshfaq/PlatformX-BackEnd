@@ -27,7 +27,7 @@ def get_all_internships(request):
     response = {}
     try:
         query = Internship.objects.all()
-        serializer = GetAllInternshipSerializer(query, many=True)
+        serializer = GetAllInternshipSerializer(query, many=True, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error occurred while getting internship"

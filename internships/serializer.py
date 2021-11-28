@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "username", "profile_image"]
+        fields = ["id", "first_name", "last_name", "username", "profile_image"]
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -37,13 +37,13 @@ class StudentSerializer(serializers.ModelSerializer):
 class GetAllInternshipSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
-
     organization = OrganizationSerializer(source='user')
+    is_applied = serializers.SerializerMethodField()
 
     class Meta:
         model = Internship
         fields = ["id", "name", "organization", "description", "duration",
-                  "is_paid", "days_left", "end_date", "status", "stipend", "created_at", "updated_at"]
+                  "is_paid", "days_left", "end_date", "status", "stipend", "is_applied", "created_at", "updated_at"]
 
     def get_status(self, obj):
         if (obj.end_date - datetime.now().date()).days > 0:
@@ -54,6 +54,12 @@ class GetAllInternshipSerializer(serializers.ModelSerializer):
         if (obj.end_date - datetime.now().date()).days > 0:
             return (obj.end_date - datetime.now().date()).days
         return 0
+
+    def get_is_applied(self, obj):
+        user = UserSerializer(self.context['request'].user)
+        if Participant.objects.filter(internship=obj.id, id=user.data['id']).exists():
+            return True
+        return False
 
 
 class GetInternshipSerializer(serializers.ModelSerializer):

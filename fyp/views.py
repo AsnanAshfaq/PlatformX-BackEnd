@@ -58,7 +58,7 @@ def delete_fyp(request):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
-# get all fyps for students
+# get all FYP's for students
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_fyps(request):
@@ -66,7 +66,7 @@ def get_all_fyps(request):
     try:
 
         fyp_query = FYP.objects.all()
-        serializer = GetAllFYPSerializer(fyp_query, many=True)
+        serializer = GetAllFYPSerializer(fyp_query, many=True, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error occurred while fetching FYP's"
