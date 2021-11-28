@@ -22,6 +22,7 @@ def create_workshop(request):
     try:
         # create workshop
         user = User.objects.get(email=request.user)
+
         data = {
             **request.data,
             "user": user

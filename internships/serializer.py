@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["profile_image"]
+        fields = ["first_name", "last_name", "username", "profile_image"]
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -24,6 +24,14 @@ class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ['uuid', 'name', 'user']
+
+
+class StudentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(source='uuid')
+
+    class Meta:
+        model = Student
+        fields = ['uuid', 'user']
 
 
 class GetAllInternshipSerializer(serializers.ModelSerializer):
@@ -66,3 +74,20 @@ class GetInternshipSerializer(serializers.ModelSerializer):
         if (obj.end_date - datetime.now().date()).days > 0:
             return (obj.end_date - datetime.now().date()).days
         return 0
+
+
+class CreateParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Participant.objects.create(**validated_data)
+
+
+class GetInternshipParticipantsSerializer(serializers.ModelSerializer):
+    student = StudentSerializer(source='id')
+
+    class Meta:
+        model = Participant
+        fields = ["student", "github", 'linked_in', 'portfolio', 'cv', 'resume', 'created_at', 'updated_at']
