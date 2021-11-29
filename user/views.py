@@ -270,7 +270,7 @@ def bot_linked_in(request):
                 "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
             }
         }
-        response = requests.post(base_url, headers=headers,json=body)
+        response = requests.post(base_url, headers=headers, json=body)
         if response.status_code == 201:
             res['success'] = "Content has been shared on LinkedIn"
             return Response(data=response, status=status.HTTP_201_CREATED)
@@ -280,3 +280,5 @@ def bot_linked_in(request):
     except:
         res['error'] = "Error while post on LinkedIn"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+

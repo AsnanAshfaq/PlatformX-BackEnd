@@ -1,6 +1,7 @@
 from django.urls import include, path
 from .views import get_user, get_all_users, edit_student, create_student, create_organization, signin, signout, \
     activate_user, password_reset, confirm_password_reset, bot_linked_in
+from .scraper import scrape_articles
 
 urlpatterns = [
     path('', get_user),
@@ -14,6 +15,7 @@ urlpatterns = [
     path('all/', get_all_users),
     path('activate/', activate_user),
     path('bot/linkedIn/', bot_linked_in),
+    path('articles/', scrape_articles),
     path('', include('user.follower.urls')),
     path('profile_image/', include('user.profile_image.urls')),
     path('background_image/', include('user.background_image.urls'))
