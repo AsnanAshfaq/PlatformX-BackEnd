@@ -103,7 +103,8 @@ class GetWorkshopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workshop
         fields = ['id', 'organization', 'topic', "charges", "is_paid", "status", 'description', "take_away",
-                  "days_left", 'speaker', 'prerequisites', 'poster', "event_date", "start_time", "end_time", 'created_at',
+                  "days_left", 'speaker', 'prerequisites', 'poster', "event_date", "start_time", "end_time",
+                  'created_at',
                   'updated_at']
 
     def get_days_left(self, obj):
@@ -123,3 +124,12 @@ class GetWorkshopParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
         fields = ['student']
+
+
+class CreateParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Participant.objects.create(**validated_data)

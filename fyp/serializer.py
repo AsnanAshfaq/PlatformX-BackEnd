@@ -60,7 +60,6 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
     organization = OrganizationSerializer(source='user')
-
     is_applied = serializers.SerializerMethodField()
 
     class Meta:

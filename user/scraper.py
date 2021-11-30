@@ -10,6 +10,9 @@ artificial_urls_list = [
     {
         "link": "https://www.brookings.edu/research/how-artificial-intelligence-is-transforming-the-world/",
     },
+    {
+        "link": "https://futureoflife.org/background/benefits-risks-of-artificial-intelligence/?cn-reloaded=1"
+    }
 
 ]
 
@@ -25,24 +28,42 @@ url = "https://www.brookings.edu/research/how-artificial-intelligence-is-transfo
 @permission_classes([IsAuthenticated])
 def scrape_articles(request):
     response = []
-    driver = webdriver.Chrome(ChromeDriverManager().install())
-
+    driver = webdriver.Chrome(executable_path="C:/chromedriver.exe")
     try:
-        for url in artificial_urls_list:
-            driver.get(url["link"])
-            soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-            title = soup.find(name="h1", class_="report-title").string
-            content = soup.find(name="div", class_="summary-text").p.string
-            image = soup.source['srcset']
-            data = {
-                "id": 1,
-                "title": title,
-                "content": content,
-                "image": image,
-                "url": url["link"]
-            }
-            response.append(data)
+        for index, key in enumerate(artificial_urls_list):
+            if index == 0:
+                driver.get(key["link"])
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                title = soup.find(name="h1", class_="report-title").string
+                content = soup.find(name="div", class_="summary-text").p.string
+                image = soup.source['srcset']
+                data = {
+                    "id": 1,
+                    "title": title,
+                    "content": content,
+                    "image": image,
+                    "url": key["link"]
+                }
+                response.append(data)
+            if index == 1:
+                driver.get(key["link"])
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                titleTag = soup.find(name="h1", class_="av-special-heading-tag")
+                title = titleTag.contents[0].string + titleTag.contents[1].string + titleTag.contents[2].string
+                content = soup.find(name="div", class_="avia_textblock").contents[0]
+                print("Content is", content)
+                # content = soup.find(name="div", class_="avia_textblock").p.string
+                # imageTag = soup.find(name="div", class_="avia-image-overlay-wrap").image
+                # print("Image tag is", imageTag)
+                # image = imageTag['src']
+                data = {
+                    "id": 1,
+                    "title": title,
+                    "content": "content",
+                    "image": "image",
+                    "url": key["link"]
+                }
+                response.append(data)
 
         return Response(data={"success": "Articles have been scraped", "data": response}, status=status.HTTP_200_OK)
 

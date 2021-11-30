@@ -5,12 +5,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from .serializer import AllWorkshopSerializer, GetWorkshopSerializer, CreateEditWorkshopSerializer, \
-    GetWorkshopParticipantSerializer
+    GetWorkshopParticipantSerializer, CreateParticipantSerializer
 from .models import Workshop, Participant
 from django.db.models import Q
 from user.models import User, Organization
 from .zoom import ZoomAPI
 from .mail import Mail
+import stripe
+from django.conf import settings
+
+stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
 
 # create workshop
@@ -153,3 +157,51 @@ def get_participants(request, id):
     except:
         response['error'] = "Error while getting workshop participants"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_workshop(request, id):
+    response = {}
+
+    try:
+        user = User.objects.get(email=request.user)
+        participant_query = Participant.objects.filter(id=user.id, workshop=id)
+
+        # check if user has not participated in the workshop
+        if participant_query.exists():
+            response['error'] = "Error occurred while register for workshop"
+            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        else:
+            # make stripe payment
+            amount = request.data['charges'] * 100 * 0.43
+            # 100 is for cents and 0.43 is for conversion from indian rupees to pakistan
+            description = request.data['description']
+
+            stripe_response = stripe.Charge.create(
+                amount=int(amount),
+                currency="inr",
+                source="tok_visa",
+                description=description,
+                receipt_email=user.email
+            )
+
+            # add user as participant to workshop
+            serializer_data = {
+                "id": user.id,
+                "workshop": id
+            }
+
+            serializer = CreateParticipantSerializer(data=serializer_data)
+            if serializer.is_valid():
+                serializer.save()
+                response['success'] = "Registration successful"
+                return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "Error occurred while register for workshop"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    except:
+        response['error'] = "Error occurred while register for workshop"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
