@@ -80,9 +80,10 @@ def get_fyp(request, id):
     response = {}
     try:
         fyp_query = FYP.objects.get(id=id)
-        serializer = GetFYPSerializer(fyp_query)
+        serializer = GetFYPSerializer(fyp_query, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
+        print(serializer)
         response['error'] = "Error occurred while fetching FYP"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
@@ -94,7 +95,7 @@ def get_organization_fyp(request):
     response = {}
     try:
         user = User.objects.get(email=request.user)
-        fyp_query = FYP.objects.filter(user=request.user.id)
+        fyp_query = FYP.objects.filter(user=user.id)
         serializer = GetOrganizationSerializer(fyp_query, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
@@ -118,8 +119,10 @@ def apply(request, id):
             serializer.save()
             response['success'] = "Successfully applied for FYP"
             return Response(data=response, status=status.HTTP_201_CREATED)
+        print(serializer.errors)
         response['error'] = "Error occurred while applying for FYP"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
+        print(serializer.errors)
         response['error'] = "Error occurred while applying for FYP"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)

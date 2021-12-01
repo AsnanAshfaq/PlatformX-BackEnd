@@ -22,5 +22,5 @@ class Submission(models.Model):
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     fyp = models.ForeignKey(to=FYP, on_delete=models.CASCADE, related_name="submission", default=None)
     api_submission_id = models.IntegerField()
-    user = models.ForeignKey(to=Student, on_delete=models.CASCADE, related_name="submission")
+    user = models.OneToOneField(to=Student, on_delete=models.CASCADE, related_name="submission")
     created_at = models.DateTimeField(auto_now_add=True, null=True)

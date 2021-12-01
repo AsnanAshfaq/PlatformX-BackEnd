@@ -63,13 +63,15 @@ class GetAllInternshipSerializer(serializers.ModelSerializer):
 
 
 class GetInternshipSerializer(serializers.ModelSerializer):
-    status = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
+    is_applied = serializers.SerializerMethodField()
+    organization = OrganizationSerializer(source='user')
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Internship
-        fields = ["id", "name", "user", "description", "skills", "user", "responsibilities", "duration",
-                  "is_paid", "days_left", "end_date", "status", "stipend", "created_at", "updated_at"]
+        fields = ["id", "name", "organization", "description", "skills", "responsibilities", "duration",
+                  "is_paid", "end_date", "stipend", "days_left", "is_applied", "status", "created_at", "updated_at"]
 
     def get_status(self, obj):
         if (obj.end_date - datetime.now().date()).days > 0:
@@ -80,6 +82,12 @@ class GetInternshipSerializer(serializers.ModelSerializer):
         if (obj.end_date - datetime.now().date()).days > 0:
             return (obj.end_date - datetime.now().date()).days
         return 0
+
+    def get_is_applied(self, obj):
+        user = UserSerializer(self.context['request'].user)
+        if Participant.objects.filter(internship=obj.id, id=user.data['id']).exists():
+            return True
+        return False
 
 
 class CreateParticipantSerializer(serializers.ModelSerializer):
@@ -97,3 +105,28 @@ class GetInternshipParticipantsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
         fields = ["student", "github", 'linked_in', 'portfolio', 'cv', 'resume', 'created_at', 'updated_at']
+
+
+class GetOrganizationSerializer(serializers.ModelSerializer):
+    participants = serializers.SerializerMethodField()
+    days_left = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Internship
+        fields = ["id", "name", "description", "skills", "responsibilities", "duration",
+                  "is_paid", "end_date", "stipend", "days_left", "participants", "status", "created_at", "updated_at"]
+
+    def get_status(self, obj):
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
+
+    def get_days_left(self, obj):
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return (obj.end_date - datetime.now().date()).days
+        return 0
+
+    def get_participants(self, obj):
+        participants_length = Participant.objects.filter(internship=obj)
+        return len(list(participants_length))

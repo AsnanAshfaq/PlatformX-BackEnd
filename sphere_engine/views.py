@@ -45,6 +45,14 @@ def create_submission(request):
     submission_id = request.data['submission_id']
     fyp_id = request.data['fyp_id']
     try:
+
+        user = User.objects.get(email=request.user)
+        fyp = FYP.objects.get(id=fyp_id)
+        # check if user has already submitted its code
+        submission_query = Submission.objects.get(user=user.id, fyp=fyp.id)
+        if submission_query:
+            # delete user previous submission
+            submission_query.delete()
         user = User.objects.get(email=request.user)
         fyp = FYP.objects.get(id=fyp_id)
         data = {
@@ -70,6 +78,7 @@ def get_test(request, id):
     response = {}
     try:
         test_query = Test.objects.get(fyp=id)
+
         if test_query:
             serializer = GetTestSerializer(test_query)
             return Response(data=serializer.data, status=status.HTTP_200_OK)

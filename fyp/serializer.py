@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import FYP, Participant
-import datetime
+from datetime import datetime
 from user.models import Organization, ProfileImage, User
 
 
@@ -61,10 +61,12 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
     days_left = serializers.SerializerMethodField()
     organization = OrganizationSerializer(source='user')
     is_applied = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes",
-                  "team_members", "end_date", "participants", "is_applied", "days_left", "created_at", "updated_at"]
+                  "team_members", "end_date", "participants", "days_left", "is_applied", "status", "created_at",
+                  "updated_at"]
         model = FYP
 
     def get_participants(self, obj):
@@ -72,7 +74,9 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
         return len(list(participants_length))
 
     def get_days_left(self, obj):
-        return (obj.end_date - datetime.date.today()).days
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return (obj.end_date - datetime.now().date()).days
+        return 0
 
     def get_is_applied(self, obj):
         user = UserSerializer(self.context['request'].user)
@@ -80,15 +84,22 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
             return True
         return False
 
+    def get_status(self, obj):
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
+
 
 class GetFYPSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
     organization = OrganizationSerializer(source='user')
+    is_applied = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes", "team_members",
-                  "end_date", "participants", "days_left", "created_at", "updated_at"]
+                  "end_date", "participants", "is_applied", "days_left", "status", "created_at", "updated_at"]
         model = FYP
 
     def get_participants(self, obj):
@@ -96,16 +107,30 @@ class GetFYPSerializer(serializers.ModelSerializer):
         return len(list(participants_length))
 
     def get_days_left(self, obj):
-        return (obj.end_date - datetime.date.today()).days
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return (obj.end_date - datetime.now().date()).days
+        return 0
+
+    def get_is_applied(self, obj):
+        user = UserSerializer(self.context['request'].user)
+        if Participant.objects.filter(fyp=obj.id, id=user.data['id']).exists():
+            return True
+        return False
+
+    def get_status(self, obj):
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
 
 
 class GetOrganizationSerializer(serializers.ModelSerializer):
     participants = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         fields = ["id", "name", "description", "category", "technologies", "outcomes", "team_members",
-                  "end_date", "participants", "days_left", "created_at", "updated_at"]
+                  "end_date", "participants", "days_left", "status", "created_at", "updated_at"]
         model = FYP
 
     def get_participants(self, obj):
@@ -113,4 +138,11 @@ class GetOrganizationSerializer(serializers.ModelSerializer):
         return len(list(participants_length))
 
     def get_days_left(self, obj):
-        return (obj.end_date - datetime.date.today()).days
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return (obj.end_date - datetime.now().date()).days
+        return 0
+
+    def get_status(self, obj):
+        if (obj.end_date - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"

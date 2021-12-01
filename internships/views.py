@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from user.models import User, Organization
 from .models import Internship, Participant
 from .serializer import GetAllInternshipSerializer, GetInternshipSerializer, CreateParticipantSerializer, \
-    GetInternshipParticipantsSerializer
+    GetInternshipParticipantsSerializer, GetOrganizationSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.parsers import FormParser, MultiPartParser, FileUploadParser
 from .zoom import ZoomAPI
@@ -42,7 +42,7 @@ def get_internship(request, id):
     response = {}
     try:
         query = Internship.objects.get(id=id)
-        serializer = GetInternshipSerializer(query)
+        serializer = GetInternshipSerializer(query, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error occurred while getting internship"
@@ -56,7 +56,7 @@ def get_organization_internship(request):
     response = {}
     try:
         query = Internship.objects.all()
-        serializer = GetAllInternshipSerializer(query, many=True)
+        serializer = GetOrganizationSerializer(query, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error occurred while getting internship"
