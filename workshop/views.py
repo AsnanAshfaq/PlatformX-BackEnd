@@ -46,6 +46,7 @@ def create_workshop(request):
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
+# update a workshop
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def update_workshop(request):
@@ -103,7 +104,7 @@ def get_workshops(request):
     response = {}
     try:
         workshop_query = Workshop.objects.all()
-        workshop_serializer = AllWorkshopSerializer(workshop_query, many=True)
+        workshop_serializer = AllWorkshopSerializer(workshop_query, many=True, context={"request": request})
         return Response(data=workshop_serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error while getting workshops"
@@ -116,8 +117,8 @@ def get_workshops(request):
 def get_workshop(request, id):
     response = {}
     try:
-        fyp_query = Workshop.objects.get(id=id)
-        serializer = GetWorkshopSerializer(fyp_query)
+        workshop_query = Workshop.objects.get(id=id)
+        serializer = GetWorkshopSerializer(workshop_query, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
         print(serializer)
@@ -161,7 +162,7 @@ def get_participants(request, id):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def register_workshop(request, id):
+def register_paid_workshop(request, id):
     response = {}
 
     try:
@@ -193,6 +194,39 @@ def register_workshop(request, id):
                 "workshop": id
             }
 
+            serializer = CreateParticipantSerializer(data=serializer_data)
+            if serializer.is_valid():
+                serializer.save()
+                response['success'] = "Registration successful"
+                return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "Error occurred while register for workshop"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    except:
+        response['error'] = "Error occurred while register for workshop"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def register_workshop(request, id):
+    response = {}
+    try:
+        user = User.objects.get(email=request.user)
+        participant_query = Participant.objects.filter(id=user.id, workshop=id)
+
+        # check if user has not participated in the workshop
+        if participant_query.exists():
+            response['error'] = "Error occurred while register for workshop"
+            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+        else:
+            # add user as participant to workshop
+            serializer_data = {
+                "id": user.id,
+                "workshop": id
+            }
             serializer = CreateParticipantSerializer(data=serializer_data)
             if serializer.is_valid():
                 serializer.save()

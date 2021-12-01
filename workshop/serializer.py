@@ -74,12 +74,13 @@ class AllWorkshopSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(source='user')
     days_left = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    is_applied = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
 
     class Meta:
         model = Workshop
-        fields = ['id', 'organization', 'topic', "charges", "is_paid", "status", 'description', "days_left", 'poster',
-                  'created_at',
-                  'updated_at']
+        fields = ['id', 'organization', 'topic', "description", "charges", "is_paid", "status", 'is_applied',
+                  "days_left", "participants", 'poster', 'created_at', 'updated_at']
 
     def get_days_left(self, obj):
         if (obj.event_date - datetime.now().date()).days > 0:
@@ -90,6 +91,15 @@ class AllWorkshopSerializer(serializers.ModelSerializer):
         if (obj.event_date - datetime.now().date()).days > 0:
             return "Open"
         return "Ended"
+
+    def get_is_applied(self, obj):
+        user = UserStudentSerializer(self.context['request'].user)
+        if Participant.objects.filter(workshop=obj.id, id=user.data['id']).exists():
+            return True
+        return False
+
+    def get_participants(self, obj):
+        return Participant.objects.filter(workshop=obj.id).count()
 
 
 class GetWorkshopSerializer(serializers.ModelSerializer):
@@ -97,15 +107,14 @@ class GetWorkshopSerializer(serializers.ModelSerializer):
     days_left = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     prerequisites = PreRequisiteSerializer(required=False, many=True, source='workshop_prerequisite')
-
+    is_applied = serializers.SerializerMethodField()
     speaker = SpeakerSerializer(required=False)
 
     class Meta:
         model = Workshop
-        fields = ['id', 'organization', 'topic', "charges", "is_paid", "status", 'description', "take_away",
-                  "days_left", 'speaker', 'prerequisites', 'poster', "event_date", "start_time", "end_time",
-                  'created_at',
-                  'updated_at']
+        fields = ['id', 'organization', 'topic', "description", "charges", "is_paid", "status", "is_applied",
+                  "take_away", "days_left", 'speaker', 'prerequisites', 'poster', "event_date", "start_time",
+                  "end_time", 'created_at', 'updated_at']
 
     def get_days_left(self, obj):
         if (obj.event_date - datetime.now().date()).days > 0:
@@ -116,6 +125,12 @@ class GetWorkshopSerializer(serializers.ModelSerializer):
         if (obj.event_date - datetime.now().date()).days > 0:
             return "Open"
         return "Ended"
+
+    def get_is_applied(self, obj):
+        user = UserStudentSerializer(self.context['request'].user)
+        if Participant.objects.filter(workshop=obj.id, id=user.data['id']).exists():
+            return True
+        return False
 
 
 class GetWorkshopParticipantSerializer(serializers.ModelSerializer):

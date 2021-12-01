@@ -1,9 +1,10 @@
 from django.urls import include, path
 from .views import get_workshops, search_workshop, get_workshop, create_workshop, start_workshop, get_participants, \
-    update_workshop, register_workshop
+    update_workshop, register_paid_workshop, register_workshop
 
 urlpatterns = [
     path('workshop/<uuid:id>/register/', register_workshop),
+    path('workshop/<uuid:id>/paid/register/', register_paid_workshop),
     path('workshop/<uuid:id>/', get_workshop),
     path('workshop/create/', create_workshop),
     path('workshop/update/', update_workshop),
