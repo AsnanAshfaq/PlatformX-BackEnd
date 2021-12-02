@@ -1,6 +1,6 @@
 from django.urls import include, path, re_path
 from .views import get_all_internships, get_organization_internship, get_internship, apply, get_internship_applicants, \
-    get_internship_applicant, schedule_meeting
+    get_internship_applicant, schedule_meeting, create_internship
 
 urlpatterns = [
 
@@ -9,6 +9,7 @@ urlpatterns = [
     path('internship/<uuid:id>/applicant/<uuid:stdid>/', get_internship_applicant),
     path('internship/<uuid:id>/applicants/', get_internship_applicants),
     path('internship/<uuid:id>/', get_internship),
+    path('internship/create/', create_internship),
     path('internship/', get_organization_internship),
     path('internships/', get_all_internships),
 ]

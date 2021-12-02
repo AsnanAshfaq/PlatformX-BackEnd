@@ -1,7 +1,8 @@
 import datetime
 
 from .models import User, Student, Follower, Organization
-from .serializer import UserSerializer, StudentSerializer, Users, FollowerSerializer, EditStudentSerializer
+from .serializer import UserSerializer, StudentSerializer, Users, FollowerSerializer, EditStudentSerializer, \
+    UserQuerySerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -282,3 +283,23 @@ def bot_linked_in(request):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def user_query(request):
+    response = {}
+    try:
+        # get query
+        query = request.data['query']
+        data = {
+            "query": query
+        }
+        serializer = UserQuerySerializer(data=data)
+        if serializer.is_valid():
+            response['success'] = "Your Query has been sent"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        response['error'] = "Error occurred while sending query"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    except:
+        response['error'] = "Error occurred while sending query"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)

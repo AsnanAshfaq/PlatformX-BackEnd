@@ -116,16 +116,15 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
 
 
 class GetUserHackathonsSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer(required=False, source='user')
-
     participants = serializers.SerializerMethodField()
     total_prize = serializers.SerializerMethodField('calculate_prize')
     days_left = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Hackathon
-        fields = ["id", "title", "tag_line", "theme_tags", "logo_image", "organization",
-                  "total_prize", "participants", "days_left", "saved_type", "created_at", "updated_at"]
+        fields = ["id", "title", "tag_line", "theme_tags", "background_image",
+                  "total_prize", "participants", "days_left", "status", "saved_type", "created_at", "updated_at"]
 
     def get_participants(self, obj):
         participants_length = Participant.objects.filter(hackathon=obj)
@@ -141,7 +140,14 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
         return total_prize
 
     def get_days_left(self, obj):
-        return (obj.end_date_of_hackathon - datetime.now().date()).days
+        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
+            return (obj.end_date_of_hackathon - datetime.now().date()).days
+        return 0
+
+    def get_status(self, obj):
+        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
 
 
 class CreateEditHackathonSerializer(serializers.ModelSerializer):

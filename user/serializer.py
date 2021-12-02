@@ -1,6 +1,6 @@
 from jinja2.nodes import Pos
 from rest_framework import serializers
-from .models import User, Student, Organization, Follower, BackgroundImage, ProfileImage
+from .models import User, Student, Organization, Follower, BackgroundImage, ProfileImage, Query
 from collections import OrderedDict
 
 
@@ -87,3 +87,12 @@ class EditStudentSerializer(serializers.ModelSerializer):
         instance.portfolio = validated_data.get('portfolio', instance.portfolio)
         instance.save()
         return instance
+
+
+class UserQuerySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Query
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Query.objects.create(**validated_data)

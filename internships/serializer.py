@@ -90,6 +90,15 @@ class GetInternshipSerializer(serializers.ModelSerializer):
         return False
 
 
+class CreateEditInternshipSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Internship
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Internship.objects.create(**validated_data)
+
+
 class CreateParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant

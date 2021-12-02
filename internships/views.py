@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view, permission_classes, parser_class
 from user.models import User, Organization
 from .models import Internship, Participant
 from .serializer import GetAllInternshipSerializer, GetInternshipSerializer, CreateParticipantSerializer, \
-    GetInternshipParticipantsSerializer, GetOrganizationSerializer
+    GetInternshipParticipantsSerializer, GetOrganizationSerializer, CreateEditInternshipSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.parsers import FormParser, MultiPartParser, FileUploadParser
 from .zoom import ZoomAPI
@@ -14,10 +14,32 @@ from .mail import Mail
 
 # Create your views here.
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_internship(request):
-    pass
+    response = {}
+    try:
+
+        user = User.objects.get(email=request.user)
+
+        data = {
+            "user": user.id,
+            **request.data
+        }
+
+        serializer = CreateEditInternshipSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            response['success'] = "Internship has been created Successfully"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        print(serializer.errors)
+        response['error'] = "Error occurred while creating Internship"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+    except:
+        print(serializer.errors)
+        response['error'] = "Error occurred while creating Internship"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 # get all internships for students

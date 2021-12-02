@@ -31,9 +31,11 @@ def create_test(request):
             serializer.save()
             response['success'] = "Test has been created"
             return Response(data=response, status=status.HTTP_201_CREATED)
+
         response['error'] = "Error occurred while creating test"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
+
         response['error'] = "Error occurred while creating test"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
