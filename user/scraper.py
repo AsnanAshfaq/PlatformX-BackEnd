@@ -5,15 +5,20 @@ from rest_framework import status
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
+import uuid
 
 artificial_urls_list = [
-    {
-        "link": "https://www.brookings.edu/research/how-artificial-intelligence-is-transforming-the-world/",
-    },
-    {
-        "link": "https://futureoflife.org/background/benefits-risks-of-artificial-intelligence/?cn-reloaded=1"
-    }
+    "https://www.brookings.edu/research/how-artificial-intelligence-is-transforming-the-world/",
+    "https://futureoflife.org/background/benefits-risks-of-artificial-intelligence/?cn-reloaded=1"
+]
 
+cyber_urls_list = [
+    "https://www.kaspersky.com/resource-center/definitions/what-is-cyber-security",
+    "https://www.upguard.com/blog/cybersecurity-important"
+]
+
+data_science_urls_list = [
+    "https://searchenterpriseai.techtarget.com/definition/data-science",
 ]
 
 url = "https://www.brookings.edu/research/how-artificial-intelligence-is-transforming-the-world/"
@@ -30,19 +35,19 @@ def scrape_articles(request):
     response = []
     driver = webdriver.Chrome(executable_path="C:/chromedriver.exe")
     try:
-        for index, key in enumerate(artificial_urls_list):
+        for index, link in enumerate(artificial_urls_list):
             if index == 0:
-                driver.get(key["link"])
+                driver.get(link)
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
                 title = soup.find(name="h1", class_="report-title").string
                 content = soup.find(name="div", class_="summary-text").p.string
                 image = soup.source['srcset']
                 data = {
-                    "id": 1,
+                    "id": uuid.uuid4(),
                     "title": title,
                     "content": content,
                     "image": image,
-                    "url": key["link"]
+                    "url": link
                 }
                 response.append(data)
             # if index == 1:
@@ -64,6 +69,40 @@ def scrape_articles(request):
             #         "url": key["link"]
             #     }
             #     response.append(data)
+
+        for index, link in enumerate(cyber_urls_list):
+            if index == 0:
+                driver.get(link)
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                title = soup.find(name="h1", class_="PageHeadline_title__f5SGz").string
+                content = soup.find(name="p", class_="MsoNormal").string
+                image = soup.find(name="div", class_="FormattedHTMLContent_host__ZtwG0 Article_text__puPkY")
+                data = {
+                    "id": uuid.uuid4(),
+                    "title": title,
+                    "content": content,
+                    "image": image.contents[0]['src'],
+                    "url": link
+                }
+                response.append(data)
+
+        for index, link in enumerate(data_science_urls_list):
+            if index == 0:
+                print("Link is", link)
+                driver.get(link)
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                title = soup.find(name="h1", class_="definition-title").string
+                content = soup.find(name="section", class_="section definition-section")
+                print("Content is", content.contents[2])
+                image = soup.find(name="div", class_="image-trim")
+                data = {
+                    "id": uuid.uuid4(),
+                    "title": title,
+                    "content": "content",
+                    "image": "image.contents[0]['src']",
+                    "url": link
+                }
+                response.append(data)
 
         return Response(data={"success": "Articles have been scraped", "data": response}, status=status.HTTP_200_OK)
 

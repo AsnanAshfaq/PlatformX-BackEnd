@@ -156,6 +156,7 @@ def get_participants(request, id):
         response['error'] = "Error while getting workshop participants"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
+
 # participating in paid workshop
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -201,6 +202,7 @@ def register_paid_workshop(request, id):
 
         response['error'] = "Error occurred while register for workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
 
 # participating in free workshop
 @api_view(['POST'])
