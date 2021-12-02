@@ -83,7 +83,6 @@ def get_fyp(request, id):
         serializer = GetFYPSerializer(fyp_query, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
-        print(serializer)
         response['error'] = "Error occurred while fetching FYP"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
@@ -110,8 +109,14 @@ def apply(request, id):
     response = {}
     try:
         user = User.objects.get(email=request.user)
+
+        participant_query = Participant.objects.filter(user=user.id, fyp=id)
+        if participant_query.exists():
+            response['error'] = "Error occurred while register for workshop"
+            return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
         data = {
-            "id": user.id,
+            "user": user.id,
             "fyp": id,
         }
         serializer = CreateParticipantSerializer(data=data)
@@ -119,10 +124,8 @@ def apply(request, id):
             serializer.save()
             response['success'] = "Successfully applied for FYP"
             return Response(data=response, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
         response['error'] = "Error occurred while applying for FYP"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
-        print(serializer.errors)
         response['error'] = "Error occurred while applying for FYP"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)

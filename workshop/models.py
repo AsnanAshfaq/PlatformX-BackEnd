@@ -47,10 +47,10 @@ class Schedule(models.Model):
 
 
 class Participant(models.Model):
-    id = models.OneToOneField(to=Student, primary_key=True, on_delete=models.CASCADE,
-                              related_name="workshop_participant")
-    workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE,
-                                 related_name="participant")
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(to=Student, on_delete=models.CASCADE, related_name="workshop_participant", default=1)
+    workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE, related_name="participant")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

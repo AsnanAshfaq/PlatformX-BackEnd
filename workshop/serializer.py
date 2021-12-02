@@ -94,7 +94,7 @@ class AllWorkshopSerializer(serializers.ModelSerializer):
 
     def get_is_applied(self, obj):
         user = UserStudentSerializer(self.context['request'].user)
-        if Participant.objects.filter(workshop=obj.id, id=user.data['id']).exists():
+        if Participant.objects.filter(workshop=obj.id, user=user.data['id']).exists():
             return True
         return False
 
@@ -128,7 +128,7 @@ class GetWorkshopSerializer(serializers.ModelSerializer):
 
     def get_is_applied(self, obj):
         user = UserStudentSerializer(self.context['request'].user)
-        if Participant.objects.filter(workshop=obj.id, id=user.data['id']).exists():
+        if Participant.objects.filter(workshop=obj.id, user=user.data['id']).exists():
             return True
         return False
 

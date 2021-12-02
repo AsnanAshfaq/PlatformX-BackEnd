@@ -80,7 +80,7 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
 
     def get_is_applied(self, obj):
         user = UserSerializer(self.context['request'].user)
-        if Participant.objects.filter(fyp=obj.id, id=user.data['id']).exists():
+        if Participant.objects.filter(fyp=obj.id, user=user.data['id']).exists():
             return True
         return False
 
@@ -113,7 +113,7 @@ class GetFYPSerializer(serializers.ModelSerializer):
 
     def get_is_applied(self, obj):
         user = UserSerializer(self.context['request'].user)
-        if Participant.objects.filter(fyp=obj.id, id=user.data['id']).exists():
+        if Participant.objects.filter(fyp=obj.id, user=user.data['id']).exists():
             return True
         return False
 

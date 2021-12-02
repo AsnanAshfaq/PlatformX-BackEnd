@@ -121,7 +121,6 @@ def get_workshop(request, id):
         serializer = GetWorkshopSerializer(workshop_query, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
-        print(serializer)
         response['error'] = "Error occurred while fetching workshop"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
@@ -150,16 +149,14 @@ def get_participants(request, id):
         response["error"] = "Invalid User Type."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)  # return the response with error
     try:
-
         participant_query = Participant.objects.filter(workshop=id)
         serializer = GetWorkshopParticipantSerializer(participant_query, many=True)
-
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error while getting workshop participants"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
-
+# participating in paid workshop
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def register_paid_workshop(request, id):
@@ -167,17 +164,14 @@ def register_paid_workshop(request, id):
 
     try:
         user = User.objects.get(email=request.user)
-        participant_query = Participant.objects.filter(id=user.id, workshop=id)
-
+        participant_query = Participant.objects.filter(user=user.id, workshop=id)
         # check if user has not participated in the workshop
         if participant_query.exists():
             response['error'] = "Error occurred while register for workshop"
             return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
-
         else:
             # make stripe payment
             amount = request.data['charges'] * 100 * 0.43
-            # 100 is for cents and 0.43 is for conversion from indian rupees to pakistan
             description = request.data['description']
 
             stripe_response = stripe.Charge.create(
@@ -190,7 +184,7 @@ def register_paid_workshop(request, id):
 
             # add user as participant to workshop
             serializer_data = {
-                "id": user.id,
+                "user": user.id,
                 "workshop": id
             }
 
@@ -204,17 +198,18 @@ def register_paid_workshop(request, id):
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     except:
+
         response['error'] = "Error occurred while register for workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
-
+# participating in free workshop
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def register_workshop(request, id):
     response = {}
     try:
         user = User.objects.get(email=request.user)
-        participant_query = Participant.objects.filter(id=user.id, workshop=id)
+        participant_query = Participant.objects.filter(user=user.id, workshop=id)
 
         # check if user has not participated in the workshop
         if participant_query.exists():
@@ -224,7 +219,7 @@ def register_workshop(request, id):
         else:
             # add user as participant to workshop
             serializer_data = {
-                "id": user.id,
+                "user": user.id,
                 "workshop": id
             }
             serializer = CreateParticipantSerializer(data=serializer_data)

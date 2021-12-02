@@ -22,7 +22,9 @@ class FYP(models.Model):
 
 
 class Participant(models.Model):
-    id = models.OneToOneField(to=Student, primary_key=True, on_delete=models.CASCADE, related_name="fyp_participant")
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(to=Student, on_delete=models.CASCADE, related_name="fyp_participant", default=1)
     fyp = models.ForeignKey(to=FYP, on_delete=models.CASCADE, related_name="participant")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
