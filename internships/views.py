@@ -12,6 +12,7 @@ from .zoom import ZoomAPI
 from .mail import Mail
 from django.core.mail import BadHeaderError
 from smtplib import SMTPException
+from datetime import datetime
 
 
 # Create your views here.
@@ -158,12 +159,11 @@ def schedule_meeting(request, id, stdid):
             zoom_response = zoom.get_response()
             mail = Mail(data=zoom.get_response, applicant_id=stdid, internship_id=id)
             # send mail to applicant
-            mail.send_mail_to_applicant()
+            join_time = schedule_time
+            mail.send_mail_to_applicant(join_url=zoom_response['join_url'], join_time=join_time)
 
-            # store meeting status and details in db
-
-            return Response(data=zoom_response, status=status.HTTP_201_CREATED)
-        return Response(data=response, status=status.HTTP_200_OK)
+            response['success'] = "Interview has been scheduled."
+            return Response(data=response, status=status.HTTP_201_CREATED)
     except BadHeaderError:
         response['error'] = "Invalid mail format"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
