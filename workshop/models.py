@@ -68,7 +68,9 @@ class Speaker(models.Model):
     email = models.EmailField()
     image = models.ImageField(upload_to=get_image_path, default="")
     about = models.TextField()
-    social_links = ArrayField(models.URLField(), default=list)
+    github = models.URLField(default="")
+    linked_in = models.URLField(default="")
+    twitter = models.URLField(default="")
 
 
 class Share(models.Model):

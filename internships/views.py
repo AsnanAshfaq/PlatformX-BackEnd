@@ -10,6 +10,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.parsers import FormParser, MultiPartParser, FileUploadParser
 from .zoom import ZoomAPI
 from .mail import Mail
+from django.core.mail import BadHeaderError
+from smtplib import SMTPException
 
 
 # Create your views here.
@@ -149,14 +151,26 @@ def get_internship_applicant(request, id, stdid):
 def schedule_meeting(request, id, stdid):
     response = {}
     try:
-        zoom = ZoomAPI(internship=id, std_id=stdid, time=request.data['time'])
+
+        schedule_time = request.data['time']
+        zoom = ZoomAPI(internship=id, std_id=stdid, time=schedule_time)
         if zoom.create_meeting() == 1:
             zoom_response = zoom.get_response()
             mail = Mail(data=zoom.get_response, applicant_id=stdid, internship_id=id)
             # send mail to applicant
             mail.send_mail_to_applicant()
+
+            # store meeting status and details in db
+
             return Response(data=zoom_response, status=status.HTTP_201_CREATED)
         return Response(data=response, status=status.HTTP_200_OK)
+    except BadHeaderError:
+        response['error'] = "Invalid mail format"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except SMTPException as e:
+        print(e)
+        response['error'] = "Error occurred while scheduling interview"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
     except:
         response['error'] = "Error occurred while scheduling interview"

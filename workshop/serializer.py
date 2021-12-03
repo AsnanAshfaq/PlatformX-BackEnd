@@ -49,7 +49,7 @@ class StudentSerializer(serializers.ModelSerializer):
 class SpeakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Speaker
-        fields = ["name", "email", "image", "about"]
+        fields = ["name", "email", "image", "about", "github", "linked_in", "twitter"]
 
 
 class PreRequisiteSerializer(serializers.ModelSerializer):

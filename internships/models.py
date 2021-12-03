@@ -43,3 +43,6 @@ class Participant(models.Model):
     resume = models.FileField(default="", blank=True, upload_to=get_resume_file_path)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+    is_meeting_scheduled = models.BooleanField(default=False)
+    meeting_schedule = models.DateTimeField(default=date.today)
+    meeting_id = models.IntegerField(default=0)

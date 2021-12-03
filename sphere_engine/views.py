@@ -31,11 +31,9 @@ def create_test(request):
             serializer.save()
             response['success'] = "Test has been created"
             return Response(data=response, status=status.HTTP_201_CREATED)
-
         response['error'] = "Error occurred while creating test"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
-
         response['error'] = "Error occurred while creating test"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -47,7 +45,6 @@ def create_submission(request):
     submission_id = request.data['submission_id']
     fyp_id = request.data['fyp_id']
     try:
-
         user = User.objects.get(email=request.user)
         fyp = FYP.objects.get(id=fyp_id)
         # check if user has already submitted its code
@@ -70,7 +67,7 @@ def create_submission(request):
         response['error'] = "Error occurred while submitting code"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
-        response['error'] = "Error occured while submitting code"
+        response['error'] = "Error occurred while submitting code"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
