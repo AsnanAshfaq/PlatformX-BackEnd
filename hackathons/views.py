@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from .models import Hackathon, Participant
 from user.models import Student, User, Organization
-from .serializer import HackathonSerializer, HackathonBriefSerializer, GetParticipantSerializer, ParticipantSerializer, \
+from .serializer import HackathonSerializer, AllHackathonSerializer, GetParticipantSerializer, ParticipantSerializer, \
     RegisterParticipantSerializer, GetUserHackathonsSerializer
 from django.db.models import Q
 
@@ -18,43 +18,10 @@ from django.db.models import Q
 @permission_classes([IsAuthenticated])
 def get_all_hackathons(request):
     response = {}
-    hackathon_serializer = ""
     try:
-        # get all the hackathons in which student has not yet applied
-        # first get user id
-        user = User.objects.get(email=request.user)
-        # get list of hackathons where user is part of
-        is_participant = Participant.objects.filter(id=user.id)
-        if len(list(is_participant)) > 0:  # if we got the list of hackathons where student has applied
-            try:
-                # it means user has applied in some of the hackathons
-                participant_serializer = ParticipantSerializer(is_participant, many=True)
-                not_participated_hackathons = []  # initialize array
-                for p in list(participant_serializer.data):  # loop through the list of data in participant
-                    try:
-                        # now get hackathons where user has not applied
-                        hackathons_query = Hackathon.objects.exclude(id=dict(p)['hackathon']).order_by('-created_at')
-                        hackathon_serializer = HackathonBriefSerializer(hackathons_query, many=True)
-                        not_participated_hackathons += hackathon_serializer.data
-                        return Response(data=not_participated_hackathons, status=status.HTTP_200_OK)
-                    except serializers.ValidationError:
-                        response['error'] = "Validation Error."
-                        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
-            except serializers.ValidationError:
-                response['error'] = "Validation Error."
-                return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            # it means user has not applied in any hackathon
-            # so simply return all of the hackathons
-            try:
-                # user has not applied for any hackathon
-                # so return all of the hackathons
-                hackathon_query = Hackathon.objects.all().order_by('-created_at')
-                hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True)
-                return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
-            except serializers.ValidationError:
-                response['error'] = "Validation Error."
-                return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+        hackathon_query = Hackathon.objects.all()
+        hackathon_serializer = AllHackathonSerializer(hackathon_query, many=True, context={"request": request})
+        return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
     except:
         response['error'] = "Error occurred while getting hackathons."
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
@@ -89,7 +56,7 @@ def search_hackathon(request):
             Q(title__search=hackathon_search_string) | Q(tag_line__search=hackathon_search_string) | Q(
                 description__search=hackathon_search_string)).order_by(
             '-created_at')
-        hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True, context={"request": request})
+        hackathon_serializer = AllHackathonSerializer(hackathon_query, many=True, context={"request": request})
         return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
 
     # if request.GET['location']:
@@ -100,8 +67,6 @@ def search_hackathon(request):
     #         '-created_at')
     #     hackathon_serializer = HackathonBriefSerializer(hackathon_query, many=True, context={"request": request})
     #     return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
-
-
 
 
 # get all participants of a single hackathon
@@ -135,4 +100,3 @@ def search_participants(request, id):
 
     response['error'] = "Nothing Found"
     return Response(data=response, status=status.HTTP_404_NOT_FOUND)
-

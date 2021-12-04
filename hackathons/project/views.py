@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .serializer import ProjectSerializer
+from .serializer import CreateEditProjectSerializer
 from user.models import User
 from hackathons.models import Project
 from django.db.models import Q
@@ -16,7 +16,7 @@ def create_project(request, id):
     user = User.objects.get(email=request.user)
     request.data['student'] = user.id
     request.data['hackathon'] = id
-    serializer = ProjectSerializer(data=request.data)
+    serializer = CreateEditProjectSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         response['success'] = "Project has been added"

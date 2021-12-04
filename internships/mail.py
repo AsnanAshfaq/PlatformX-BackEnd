@@ -31,6 +31,7 @@ class Mail:
                   f"Be prepared for the interview. Do your homework on things related to your rule in the internship.\n" \
                   f"Good Luck for the Interview"
 
+
         send_mail(
             subject=subject,
             message=message,

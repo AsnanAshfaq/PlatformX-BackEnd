@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from user.models import User, Organization
 from .models import Internship, Participant
-from .serializer import GetAllInternshipSerializer, GetInternshipSerializer, CreateParticipantSerializer, \
+from .serializer import GetAllInternshipSerializer, GetInternshipSerializer, CreateEditParticipantSerializer, \
     GetInternshipParticipantsSerializer, GetOrganizationSerializer, CreateEditInternshipSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.parsers import FormParser, MultiPartParser, FileUploadParser
@@ -107,7 +107,7 @@ def apply(request, id):
             "linked_in": request['linked_in'][0],
             "cv": request['cv'][0],
         }
-        serializer = CreateParticipantSerializer(data=data)
+        serializer = CreateEditParticipantSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             response['success'] = "Successfully applied for the internship"
@@ -162,16 +162,24 @@ def schedule_meeting(request, id, stdid):
             join_time = schedule_time
             mail.send_mail_to_applicant(join_url=zoom_response['join_url'], join_time=join_time)
 
+            # adding meeting details to participant model
+            # participant_query = Participant.objects.get(internship=id, id=stdid)
+            data = {
+                "meeting_id": zoom_response['uuid'],
+                "is_meeting_scheduled": True,
+                "meeting_schedule": schedule_time
+            }
+            # serializer = CreateEditParticipantSerializer(participant_query,data=data)
+            # if serializer.is_valid():
             response['success'] = "Interview has been scheduled."
             return Response(data=response, status=status.HTTP_201_CREATED)
+
     except BadHeaderError:
         response['error'] = "Invalid mail format"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except SMTPException as e:
-        print(e)
         response['error'] = "Error occurred while scheduling interview"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
-
     except:
         response['error'] = "Error occurred while scheduling interview"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

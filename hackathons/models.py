@@ -91,8 +91,9 @@ class JudgingCriteria(models.Model):
 
 
 class Participant(models.Model):
-    id = models.OneToOneField(to=User, primary_key=True, on_delete=models.CASCADE,
-                              related_name="hackathon_participant")
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(to=Student, on_delete=models.CASCADE, related_name="hackathon_participant", default=1)
     hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
                                   related_name="participant")
     join_date = models.DateTimeField(auto_now_add=True)

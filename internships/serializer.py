@@ -99,13 +99,25 @@ class CreateEditInternshipSerializer(serializers.ModelSerializer):
         return Internship.objects.create(**validated_data)
 
 
-class CreateParticipantSerializer(serializers.ModelSerializer):
+class CreateEditParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
         fields = "__all__"
 
     def create(self, validated_data):
         return Participant.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.internship = validated_data.get('internship', instance.internship)
+        instance.github = validated_data.get('github', instance.github)
+        instance.linked_in = validated_data.get('linked_in', instance.linked_in)
+        instance.portfolio = validated_data.get('portfolio', instance.portfolio)
+        instance.cv = validated_data.get('cv', instance.cv)
+        instance.resume = validated_data.get('resume', instance.resume)
+        instance.is_meeting_scheduled = validated_data.get('is_meeting_scheduled', instance.is_meeting_scheduled)
+        instance.meeting_schedule = validated_data.get('meeting_schedule', instance.meeting_schedule)
+        instance.meeting_id = validated_data.get('resume', instance.meeting_id)
+        return instance
 
 
 class GetInternshipParticipantsSerializer(serializers.ModelSerializer):

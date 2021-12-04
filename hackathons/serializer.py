@@ -12,6 +12,14 @@ class UserProfileImageSerializer(serializers.ModelSerializer):
         fields = ["id", "metadata", "path"]
 
 
+class UserStudentSerializer(serializers.ModelSerializer):
+    profile_image = UserProfileImageSerializer(source='user_profile_image')
+
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "username", "last_name", "profile_image"]
+
+
 class UserFollowersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follower
@@ -88,17 +96,19 @@ class HackathonSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class HackathonBriefSerializer(serializers.ModelSerializer):
+class AllHackathonSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(required=False, source='user')
     total_prize = serializers.SerializerMethodField('calculate_prize')
     participants = serializers.SerializerMethodField()
     days_left = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    is_applied = serializers.SerializerMethodField()
 
     class Meta:
         model = Hackathon
-        fields = ["id", "title", "tag_line", "description", "theme_tags", "start_date_of_hackathon",
-                  "end_date_of_hackathon", "total_prize", "participants", "days_left", "organization", "created_at",
-                  "updated_at"]
+        fields = ["id", "organization", "title", "tag_line", "theme_tags", "start_date_of_hackathon",
+                  "background_image", "end_date_of_hackathon", "total_prize", "is_applied", "participants", "status",
+                  "days_left", "created_at", "updated_at"]
 
     def calculate_prize(self, obj):
         prizes = Prize.objects.filter(hackathon=obj).values('value')
@@ -113,6 +123,17 @@ class HackathonBriefSerializer(serializers.ModelSerializer):
 
     def get_days_left(self, obj):
         return (obj.end_date_of_hackathon - datetime.now().date()).days
+
+    def get_status(self, obj):
+        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
+
+    def get_is_applied(self, obj):
+        user = UserStudentSerializer(self.context['request'].user)
+        if Participant.objects.filter(hackathon=obj.id, user=user.data['id']).exists():
+            return True
+        return False
 
 
 class GetUserHackathonsSerializer(serializers.ModelSerializer):

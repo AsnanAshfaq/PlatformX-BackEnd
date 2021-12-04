@@ -2,10 +2,13 @@ from rest_framework import serializers
 from hackathons.models import Project
 
 
-class ProjectSerializer(serializers.ModelSerializer):
+class CreateEditProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = "__all__"
+
+    def create(self, validated_data):
+        return Project.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
