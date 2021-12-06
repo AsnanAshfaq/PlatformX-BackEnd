@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from .models import Hackathon, Participant
 from user.models import Student, User, Organization
-from .serializer import HackathonSerializer, AllHackathonSerializer, GetParticipantSerializer, ParticipantSerializer, \
-    RegisterParticipantSerializer, GetUserHackathonsSerializer
+from .serializer import GetHackathonSerializer, AllHackathonSerializer, GetParticipantSerializer, ParticipantSerializer, \
+    GetUserHackathonsSerializer
 from django.db.models import Q
 
 
@@ -27,7 +27,7 @@ def get_all_hackathons(request):
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
-# get specific hackathon
+# get a single hackathon
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_hackathon(request, id):
@@ -35,7 +35,7 @@ def get_hackathon(request, id):
     response = {}
     try:
         hackathon = Hackathon.objects.get(id=id)
-        hackathon_serializer = HackathonSerializer(hackathon)
+        hackathon_serializer = GetHackathonSerializer(hackathon, context={"request": request})
         return Response(data=hackathon_serializer.data, status=status.HTTP_200_OK)
     except:
         response["error"] = "Error occurred while getting hackathon."
@@ -79,6 +79,7 @@ def get_participants(request, id):
         participant_serializer = GetParticipantSerializer(participants_query, many=True)
         return Response(data=participant_serializer.data, status=status.HTTP_200_OK)
     except:
+        print(participant_serializer)
         response['error'] = "Error occurred while getting participants"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 

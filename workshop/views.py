@@ -13,6 +13,7 @@ from .zoom import ZoomAPI
 from .mail import Mail
 import stripe
 from django.conf import settings
+from payment.serializer import CreatePayment
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
@@ -183,23 +184,34 @@ def register_paid_workshop(request, id):
                 receipt_email=user.email
             )
 
-            # add user as participant to workshop
-            serializer_data = {
+            payment_data = {
                 "user": user.id,
-                "workshop": id
+                "charge_id": stripe_response['id']
             }
 
-            serializer = CreateParticipantSerializer(data=serializer_data)
-            if serializer.is_valid():
-                serializer.save()
-                response['success'] = "Registration successful"
-                return Response(data=response, status=status.HTTP_201_CREATED)
+            payment_serializer = CreatePayment(data=payment_data)
+            if payment_serializer.is_valid():
+
+                payment_serializer.save()
+
+                # add user as participant to workshop
+                serializer_data = {
+                    "user": user.id,
+                    "workshop": id
+                }
+
+                # add stripe id in payment
+                # add participant
+                serializer = CreateParticipantSerializer(data=serializer_data)
+                if serializer.is_valid():
+                    serializer.save()
+                    response['success'] = "Registration successful"
+                    return Response(data=response, status=status.HTTP_201_CREATED)
 
         response['error'] = "Error occurred while register for workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
     except:
-
         response['error'] = "Error occurred while register for workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 

@@ -37,9 +37,6 @@ class Hackathon(models.Model):
     tag_line = models.TextField(default='')
     description = models.TextField(default='')
     theme_tags = ArrayField(models.CharField(max_length=25, blank=True), default=list)
-    is_team_required = models.BooleanField(default=False, null=False)
-    min_team_members = models.IntegerField(default=0)
-    max_team_members = models.IntegerField(default=0)
     rules = ArrayField(models.TextField(), default=list)
     resource = ArrayField(models.TextField(), default=list)
     submission_requirement = ArrayField(models.TextField(), default=list)
@@ -93,7 +90,7 @@ class JudgingCriteria(models.Model):
 class Participant(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user = models.ForeignKey(to=Student, on_delete=models.CASCADE, related_name="hackathon_participant", default=1)
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="hackathon_participant", default=1)
     hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
                                   related_name="participant")
     join_date = models.DateTimeField(auto_now_add=True)

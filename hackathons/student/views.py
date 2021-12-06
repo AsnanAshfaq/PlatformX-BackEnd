@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from user.models import User
-from hackathons.serializer import RegisterParticipantSerializer
+from .serializer import RegisterParticipantSerializer
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -10,13 +10,13 @@ from rest_framework import status
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def register(request, id):
+    response = {}
     try:
         student = User.objects.get(email=request.user)
         data = {
-            "id": student.id,
+            "user": student.id,
             "hackathon": id
         }
-        response = {}
         participant_serializer = RegisterParticipantSerializer(data=data)
         if participant_serializer.is_valid():
             participant_serializer.save()

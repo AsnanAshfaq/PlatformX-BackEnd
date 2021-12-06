@@ -34,22 +34,16 @@ class HackathonUserSerializer(serializers.ModelSerializer):
         fields = ["profile_image"]
 
 
-class RegisterParticipantSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Participant
-        fields = "__all__"
-
-
 class ParticipantUserSerializer(serializers.ModelSerializer):
     profile_image = UserProfileImageSerializer(source='user_profile_image')
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'profile_image']
+        fields = ['first_name', 'last_name', 'username', "profile_image"]
 
 
 class GetParticipantSerializer(serializers.ModelSerializer):
-    user = ParticipantUserSerializer(source='id')
+    user = ParticipantUserSerializer()
 
     class Meta:
         model = Participant
@@ -88,12 +82,39 @@ class ParticipantSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class HackathonSerializer(serializers.ModelSerializer):
+class GetHackathonSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(required=False, source='user')
+    prizes = PrizeSerializer(many=True)
+    criteria = CriteriaSerializer(many=True, source='hackathon_judging_criteria')
+    participants = serializers.SerializerMethodField()
+    days_left = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    is_applied = serializers.SerializerMethodField()
 
     class Meta:
         model = Hackathon
-        fields = "__all__"
+        fields = ["id", "organization", "title", "tag_line", "description", "theme_tags", "rules", "resource",
+                  "submission_requirement", "background_image", "is_video_required", "start_date_of_hackathon",
+                  "start_time_of_hackathon", "end_date_of_hackathon", "end_time_of_hackathon", "saved_type",
+                  "prizes", "criteria", "participants", "days_left", "status", "is_applied", "created_at", "updated_at"]
+
+    def get_participants(self, obj):
+        participants_length = Participant.objects.filter(hackathon=obj)
+        return len(list(participants_length))
+
+    def get_days_left(self, obj):
+        return (obj.end_date_of_hackathon - datetime.now().date()).days
+
+    def get_status(self, obj):
+        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
+            return "Open"
+        return "Ended"
+
+    def get_is_applied(self, obj):
+        user = UserStudentSerializer(self.context['request'].user)
+        if Participant.objects.filter(hackathon=obj.id, user=user.data['id']).exists():
+            return True
+        return False
 
 
 class AllHackathonSerializer(serializers.ModelSerializer):
@@ -144,8 +165,8 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hackathon
-        fields = ["id", "title", "tag_line", "theme_tags", "background_image",
-                  "total_prize", "participants", "days_left", "status", "saved_type", "created_at", "updated_at"]
+        fields = ["id", "title", "tag_line", "theme_tags", "background_image", "total_prize", "participants",
+                  "days_left", "status", "saved_type", "created_at", "updated_at"]
 
     def get_participants(self, obj):
         participants_length = Participant.objects.filter(hackathon=obj)
