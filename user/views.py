@@ -2,7 +2,7 @@ import datetime
 
 from .models import User, Student, Follower, Organization
 from .serializer import UserSerializer, StudentSerializer, Users, FollowerSerializer, EditStudentSerializer, \
-    UserQuerySerializer
+    UserQuerySerializer, GetOtherUserSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -28,6 +28,21 @@ def get_user(request):
         return Response(data=user_serializer.data, status=status.HTTP_200_OK)
 
     except:
+        response["error"] = "Error occurred while getting user data"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_other_user(request, id):
+    response = {}
+    try:
+        user = User.objects.get(id=id)
+        user_serializer = GetOtherUserSerializer(user)
+        return Response(data=user_serializer.data, status=status.HTTP_200_OK)
+
+    except:
+        print(user_serializer)
         response["error"] = "No such user exist"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
