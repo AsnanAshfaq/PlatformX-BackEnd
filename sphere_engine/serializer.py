@@ -74,6 +74,20 @@ class GetSubmissionSerializer(serializers.ModelSerializer):
         return j
 
 
+class GetStudentSubmissionSerializer(serializers.ModelSerializer):
+    data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Submission
+        fields = ["fyp", "api_submission_id", "data"]
+
+    def get_data(self, obj):
+        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token=dc64519a0564fd943e20b09564ac9be5'
+        response = requests.get(url)
+        j = response.json()
+        return j
+
+
 class CreateSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission

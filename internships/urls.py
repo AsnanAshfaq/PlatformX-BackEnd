@@ -3,7 +3,6 @@ from .views import get_all_internships, get_organization_internship, get_interns
     get_internship_applicant, schedule_meeting, create_internship
 
 urlpatterns = [
-
     path('internship/<uuid:id>/apply/', apply),
     path('internship/<uuid:id>/applicant/<uuid:stdid>/meeting/', schedule_meeting),
     path('internship/<uuid:id>/applicant/<uuid:stdid>/', get_internship_applicant),

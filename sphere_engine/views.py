@@ -3,11 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from user.models import User, Organization
+from user.models import User, Organization, Student
 from .models import Test, Submission
 from fyp.models import FYP, Participant
 from .serializer import CreateEditTestSerializer, GetTestSerializer, GetAllSubmissionSerializer, \
-    GetSubmissionSerializer, CreateSubmissionSerializer
+    GetSubmissionSerializer, CreateSubmissionSerializer, GetStudentSubmissionSerializer
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -87,6 +87,7 @@ def get_test(request, id):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
 
+# get all submissions of a fyp
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_all_submission(request, id):
@@ -119,4 +120,27 @@ def get_submission(request, fypID, submissionID):
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
         response['error'] = "Error while getting Submissions"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# get submission code for student
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_student_submission(request, fypID):
+    response = {}
+
+    try:
+        user = User.objects.get(email=request.user)
+        student_query = Student.objects.get(uuid=user.id)
+
+        submission_query = Submission.objects.filter(fyp=fypID, user=student_query)
+        if submission_query.exists():
+            serializer = GetStudentSubmissionSerializer(submission_query)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        response['not_found'] = "You have not submitted any code."
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+    except:
+        response['error'] = "Error while getting Submission"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
