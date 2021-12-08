@@ -26,6 +26,8 @@ class Workshop(models.Model):
     # meeting_link = models.URLField()
     is_paid = models.BooleanField(default=False)
     charges = models.IntegerField(default=0)
+    start_url = models.TextField(default="")
+    join_url = models.TextField(default="")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 

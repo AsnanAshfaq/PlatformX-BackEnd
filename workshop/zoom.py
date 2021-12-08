@@ -14,19 +14,7 @@ class ZoomAPI:
         "Authorization": token
     }
     body = {
-        "type": 1,  # for now
-        # "start_time": "2020-06-26T14:30:00Z",
-        # "duration": 60,
-        # "recurrence": {
-        #     "type": "1",
-        #     "repeat_interval": "1",
-        #     "weekly_days": "4",
-        #     "monthly_day": 30,
-        #     "monthly_week": "4",
-        #     "monthly_week_day": "4",
-        #     "end_times": 1,
-        #     "end_date_time": "2020-07-04T16:20:00Z"
-        # },
+        "type": 2,  # schedule
         "settings": {
             "host_video": True,
             "participant_video": False,
@@ -43,14 +31,11 @@ class ZoomAPI:
             "alternative_hosts": "",  # add email address of the manager of the meeting
             "close_registration": True,  # close registration after event date
             "waiting_room": True,  # enable waiting room
-            "contact_name": "Asnan",  # contact name for meeting registration
-            # "contact_email": "18asnan@gmail.com",  # contact email address for meeting registration
             "registrants_email_notification": True,
             "registrants_confirmation_email": True,  # sends registrants an email confirmation
             "meeting_authentication": False,
             "authentication_option": "",
             "authentication_domains": "",
-            "authenticiation_exception": [{"name": "Asnan", "email": "haidershakeel599@gmail.com"}],
             "alternative_hosts_email_notification": ""  # add email address of the manager of the workshop
         },
     }
@@ -63,8 +48,13 @@ class ZoomAPI:
         self.body['agenda'] = self.get_workshop_description()
         self.body['password'] = self.generate_password()
         self.body["start_time"] = self.get_workshop_start_time()
+        # self.body["start_time"] = "2021-10-12T20:00:00Z"
+        self.body['timezone'] = "Asia/Tashkent"
         self.body['schedule_for'] = self.get_organization_email()
         self.body['contact_email'] = self.get_organization_email()
+        # self.body['settings']['alternative_hosts'] = self.get_organization_email()
+        self.body['settings']['contact_name'] = self.get_organization_name()
+        print("start time is ", self.body)
         response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
         if response.status_code == 201:
             self.set_response(json=response.json)
@@ -77,7 +67,9 @@ class ZoomAPI:
 
     def get_workshop_start_time(self):
         query = self.workshop_query()
-        return query.event_date.strftime('%Y/%m/%d') + "T" + query.start_time.strftime('%H/%M/%S') + "Z"
+        print("Start time is",
+              query.event_date.strftime('%Y-%m-%d') + "T" + query.start_time.strftime('%H:%M:%S') + "Z")
+        return query.event_date.strftime('%Y-%m-%d') + "T" + query.start_time.strftime('%H:%M:%S') + "Z"
 
     def get_organization_email(self):
         workshop_query = self.workshop_query()
@@ -100,6 +92,11 @@ class ZoomAPI:
             return workshop_query
         else:
             self.reject_request()
+
+    def get_organization_name(self):
+        query = self.workshop_query()
+        user = Organization.objects.get(uuid=query.user.uuid)
+        return user.name
 
     def generate_password(self):
         return "".join(random.choices(string.ascii_lowercase + string.ascii_uppercase + string.digits, k=10))

@@ -14,6 +14,9 @@ from .mail import Mail
 import stripe
 from django.conf import settings
 from payment.serializer import CreatePayment
+from .zoom import ZoomAPI
+from smtplib import SMTPException
+from django.core.mail import BadHeaderError, send_mail
 
 stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
@@ -31,16 +34,16 @@ def create_workshop(request):
         # get data from request
         data = dict(request.data)
 
-        for index, path in enumerate(data['poster']):
-            poster = path
-
-        for index, path in enumerate(data['image']):
-            image = path
+        # for index, path in enumerate(data['poster']):
+        #     poster = path
+        #
+        # for index, path in enumerate(data['image']):
+        #     image = path
         workshop_data = {
             "user": user,
             "topic": data["topic"][0],
             "description": data["description"][0],
-            "poster": poster,
+            # "poster": poster,
             "take_away": data["take_away"],
             "is_paid": False if data["is_paid"][0] == "false" else True,
             "charges": data["charges"][0],
@@ -59,27 +62,48 @@ def create_workshop(request):
                 "workshop": workshop.id,
                 "name": data["name"][0],
                 "email": data["email"][0],
-                "image": image,
+                # "image": image,
                 "about": data["about"][0],
                 "github": data["github"][0],
                 "linked_in": data["linked_in"][0],
                 "twitter": data["twitter"][0]
             }
 
-
-
             speaker_serializer = CreateEditSpeakerSerializer(data=speaker_data)
             if speaker_serializer.is_valid():
+                speaker_serializer.save()
                 response['success'] = "Workshop has been created"
-                return Response(data=response, status=status.HTTP_201_CREATED)
 
-        print(speaker_serializer.errors)
-        print(serializer.errors)
+                # make zoom api call
+
+                zoom = ZoomAPI(workshop=workshop.id)
+                if zoom.create_meeting() == 1:
+                    zoom_response = zoom.get_response()
+                    # save join url and meeting url in db
+                    join_url = zoom_response()['join_url']
+                    start_url = zoom_response()['start_url']
+
+                    workshop.start_url = start_url
+                    workshop.join_url = join_url
+                    workshop.save()
+                    # send mail to organization
+                    mail = Mail(workshop=workshop)
+
+                    mail.send_mail_to_organization()
+                    # mail.send_mail_to_speaker()
+
+                    return Response(data=zoom_response(), status=status.HTTP_201_CREATED)
+
         response['error'] = "Error while creating workshop"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except SMTPException as e:
+        print(e)
+        response['error'] = "Error occurred while scheduling interview"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except BadHeaderError:
+        response['error'] = "Invalid mail format"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
-        print(serializer.errors)
-        print(speaker_serializer.errors)
         response['error'] = "Error while creating workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -242,6 +266,11 @@ def register_paid_workshop(request, id):
                 serializer = CreateParticipantSerializer(data=serializer_data)
                 if serializer.is_valid():
                     serializer.save()
+
+                    # send mail to participant
+
+                    mail = Mail(workshop=id)
+                    mail.send_mail_to_participant()
                     response['success'] = "Registration successful"
                     return Response(data=response, status=status.HTTP_201_CREATED)
 
@@ -276,6 +305,10 @@ def register_workshop(request, id):
             serializer = CreateParticipantSerializer(data=serializer_data)
             if serializer.is_valid():
                 serializer.save()
+
+                # make zoom api call
+
+                # send mail to participant
                 response['success'] = "Registration successful"
                 return Response(data=response, status=status.HTTP_201_CREATED)
 

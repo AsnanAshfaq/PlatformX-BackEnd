@@ -57,7 +57,6 @@ class ZoomAPI:
         # self.body['settings']['alternative_hosts'] = self.get_organization_email()
         self.body['settings']['contact_name'] = self.get_organization_name()
 
-
         response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
         if response.status_code == 201:
             self.response = response.json()
