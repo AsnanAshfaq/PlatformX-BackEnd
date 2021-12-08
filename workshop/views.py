@@ -90,9 +90,9 @@ def create_workshop(request):
                     mail = Mail(workshop=workshop)
 
                     mail.send_mail_to_organization()
-                    # mail.send_mail_to_speaker()
+                    mail.send_mail_to_speaker()
 
-                    return Response(data=zoom_response(), status=status.HTTP_201_CREATED)
+                    return Response(data=response, status=status.HTTP_201_CREATED)
 
         response['error'] = "Error while creating workshop"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
@@ -268,9 +268,8 @@ def register_paid_workshop(request, id):
                     serializer.save()
 
                     # send mail to participant
-
                     mail = Mail(workshop=id)
-                    mail.send_mail_to_participant()
+                    mail.send_mail_to_participant(user_mail=user.email)
                     response['success'] = "Registration successful"
                     return Response(data=response, status=status.HTTP_201_CREATED)
 
@@ -306,9 +305,9 @@ def register_workshop(request, id):
             if serializer.is_valid():
                 serializer.save()
 
-                # make zoom api call
-
                 # send mail to participant
+                mail = Mail(workshop=id)
+                mail.send_mail_to_participant(user_mail=user.email)
                 response['success'] = "Registration successful"
                 return Response(data=response, status=status.HTTP_201_CREATED)
 

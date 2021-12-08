@@ -54,7 +54,7 @@ class ZoomAPI:
         self.body['contact_email'] = self.get_organization_email()
         # self.body['settings']['alternative_hosts'] = self.get_organization_email()
         self.body['settings']['contact_name'] = self.get_organization_name()
-        print("start time is ", self.body)
+
         response = requests.post(self.base_url + "users/me/meetings", json=self.body, headers=self.headers)
         if response.status_code == 201:
             self.set_response(json=response.json)
@@ -67,8 +67,6 @@ class ZoomAPI:
 
     def get_workshop_start_time(self):
         query = self.workshop_query()
-        print("Start time is",
-              query.event_date.strftime('%Y-%m-%d') + "T" + query.start_time.strftime('%H:%M:%S') + "Z")
         return query.event_date.strftime('%Y-%m-%d') + "T" + query.start_time.strftime('%H:%M:%S') + "Z"
 
     def get_organization_email(self):
