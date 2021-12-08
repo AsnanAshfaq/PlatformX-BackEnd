@@ -58,6 +58,15 @@ class PreRequisiteSerializer(serializers.ModelSerializer):
         fields = ["title", "description"]
 
 
+class CreateEditSpeakerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Speaker
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return Speaker.objects.create(**validated_data)
+
+
 class CreateEditWorkshopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workshop

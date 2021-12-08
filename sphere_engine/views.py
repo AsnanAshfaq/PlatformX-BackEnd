@@ -46,17 +46,16 @@ def create_submission(request):
     fyp_id = request.data['fyp_id']
     try:
         user = User.objects.get(email=request.user)
+        student_query = Student.objects.get(uuid=user.id)
         fyp = FYP.objects.get(id=fyp_id)
         # check if user has already submitted its code
-        submission_query = Submission.objects.get(user=user.id, fyp=fyp.id)
-        if submission_query:
+        submission_query = Submission.objects.filter(user=student_query, fyp=fyp.id)
+        if submission_query.exists():
             # delete user previous submission
             submission_query.delete()
-        user = User.objects.get(email=request.user)
-        fyp = FYP.objects.get(id=fyp_id)
         data = {
-            "fyp": fyp.id,
-            "user": user,
+            "fyp": fyp_id,
+            "user": student_query,
             "api_submission_id": submission_id
         }
         serializer = CreateSubmissionSerializer(data=data)
@@ -98,7 +97,8 @@ def get_all_submission(request, id):
         if submission_query.exists():
             serializer = GetAllSubmissionSerializer(submission_query, many=True)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
-        response['error'] = "Error while getting Submissions"
+
+        response['not_found'] = "Not any submissions yet"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
         response['error'] = "Error while getting Submissions"
@@ -133,8 +133,8 @@ def get_student_submission(request, fypID):
         user = User.objects.get(email=request.user)
         student_query = Student.objects.get(uuid=user.id)
 
-        submission_query = Submission.objects.filter(fyp=fypID, user=student_query)
-        if submission_query.exists():
+        submission_query = Submission.objects.get(fyp=fypID, user=student_query)
+        if submission_query:
             serializer = GetStudentSubmissionSerializer(submission_query)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
 

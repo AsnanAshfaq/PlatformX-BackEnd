@@ -16,5 +16,4 @@ urlpatterns = [
     path('hackathon/edit/', edit_hackathon),
     path('hackathon/', get_organization_hackathons),
     path('hackathons/', get_all_hackathons),
-    path('hackathon/share/', include('hackathons.share.urls')),
 ]

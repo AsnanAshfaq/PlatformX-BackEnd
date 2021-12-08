@@ -66,19 +66,6 @@ class Prize(models.Model):
     value = models.IntegerField()  # prize money
 
 
-class Judge(models.Model):
-
-    def get_image_path(self, filename):
-        return "hackathon" + "/" + str(self.hackathon.id) + "/" + "judges" + "/" + str(self.name) + "-" + str(filename)
-
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE, related_name="judges")
-    name = models.CharField(max_length=25)
-    email = models.EmailField()
-    image = models.ImageField(upload_to=get_image_path, default="")
-
-
 class JudgingCriteria(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -96,26 +83,17 @@ class Participant(models.Model):
     join_date = models.DateTimeField(auto_now_add=True)
 
 
-class Team(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
-                                  related_name="team")
-    emails = ArrayField(models.URLField())
-
-
-class Share(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user = models.ForeignKey(
-        'user.User', on_delete=models.CASCADE, related_name="hackathon_share")
-    hackathon = models.ForeignKey(
-        Hackathon, on_delete=models.CASCADE, related_name="shares", null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class Project(models.Model):
+    def get_logo_image_path(self, filename):
+        return "hackathon" + "/" + "project" + "/" + str(self.id) + "/" + "logo" + "/" + str(self.title) + "-" + str(
+            filename)
+
+    def get_file_path(self, filename):
+        return "hackathon" + "/" + "project" + "/" + str(self.id) + "/" + "file" + "/" + str(self.title) + "-" + str(
+            filename)
+
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     student = models.ForeignKey(to=Student, on_delete=models.CASCADE, related_name="project", default="")
@@ -126,18 +104,7 @@ class Project(models.Model):
     tag_line = models.TextField(default='')
     about = models.TextField(default='')
     built_with = ArrayField(models.TextField(max_length=25, default=""), blank=True, default=list)
-    links = ArrayField(base_field=models.URLField(default=""), blank=True, default=list)
+    links = models.URLField()
     video_link = models.URLField(default="", blank=True)
-
-
-class ProjectMedia(models.Model):
-
-    def get_image_path_and_filename(self, filename):
-        return "hackathon" + "/" + str(self.project.hackathon.id) + "/" + "project" + "/" + str(self.id) + str(filename)
-
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False)
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name="images", null=False)
-    metadata = models.CharField(max_length=30, default="", null=True, blank=True)
-    path = models.ImageField(upload_to=get_image_path_and_filename, default="")
+    logo = models.ImageField(upload_to=get_logo_image_path, default='', blank=True)
+    file = models.FileField(default="", upload_to=get_file_path)

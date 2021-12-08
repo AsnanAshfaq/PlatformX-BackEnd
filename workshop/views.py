@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from .serializer import AllWorkshopSerializer, GetWorkshopSerializer, CreateEditWorkshopSerializer, \
-    GetWorkshopParticipantSerializer, CreateParticipantSerializer
+    GetWorkshopParticipantSerializer, CreateParticipantSerializer, CreateEditSpeakerSerializer
 from .models import Workshop, Participant
 from django.db.models import Q
 from user.models import User, Organization
@@ -28,21 +28,58 @@ def create_workshop(request):
         # create workshop
         user = User.objects.get(email=request.user)
 
-        data = {
-            **request.data,
-            "user": user
+        # get data from request
+        data = dict(request.data)
+
+        for index, path in enumerate(data['poster']):
+            poster = path
+
+        for index, path in enumerate(data['image']):
+            image = path
+        workshop_data = {
+            "user": user,
+            "topic": data["topic"][0],
+            "description": data["description"][0],
+            "poster": poster,
+            "take_away": data["take_away"],
+            "is_paid": False if data["is_paid"][0] == "false" else True,
+            "charges": data["charges"][0],
+            "event_date": data["event_date"][0],
+            "start_time": data['start_time'][0],
+            "end_time": data["end_time"][0]
         }
-        serializer = CreateEditWorkshopSerializer(data=data)
+
+        serializer = CreateEditWorkshopSerializer(data=workshop_data)
         if serializer.is_valid():
             workshop = serializer.save()
             response['id'] = workshop.id
-            response['success'] = "Workshop has been created"
-            return Response(data=response, status=status.HTTP_201_CREATED)
+
+            # get speaker data
+            speaker_data = {
+                "workshop": workshop.id,
+                "name": data["name"][0],
+                "email": data["email"][0],
+                "image": image,
+                "about": data["about"][0],
+                "github": data["github"][0],
+                "linked_in": data["linked_in"][0],
+                "twitter": data["twitter"][0]
+            }
+
+
+
+            speaker_serializer = CreateEditSpeakerSerializer(data=speaker_data)
+            if speaker_serializer.is_valid():
+                response['success'] = "Workshop has been created"
+                return Response(data=response, status=status.HTTP_201_CREATED)
+
+        print(speaker_serializer.errors)
         print(serializer.errors)
         response['error'] = "Error while creating workshop"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
     except:
         print(serializer.errors)
+        print(speaker_serializer.errors)
         response['error'] = "Error while creating workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 

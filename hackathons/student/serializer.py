@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from hackathons.models import Participant, Hackathon
+from hackathons.models import Participant, Hackathon, Project
 from user.serializer import UserSerializer
 from user.models import User, Organization, ProfileImage, BackgroundImage, Follower, Student
 from django.utils.timezone import now

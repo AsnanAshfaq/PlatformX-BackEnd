@@ -62,15 +62,15 @@ class Speaker(models.Model):
 
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    workshop = models.OneToOneField(to=Workshop, on_delete=models.CASCADE,
+    workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE,
                                     related_name="speaker")
     name = models.CharField(max_length=50)
     email = models.EmailField()
     image = models.ImageField(upload_to=get_image_path, default="")
     about = models.TextField()
-    github = models.URLField(default="")
-    linked_in = models.URLField(default="")
-    twitter = models.URLField(default="")
+    github = models.TextField(default="")
+    linked_in = models.TextField(default="")
+    twitter = models.TextField(default="")
 
 
 class Share(models.Model):
