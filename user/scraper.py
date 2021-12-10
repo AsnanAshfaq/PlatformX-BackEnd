@@ -21,6 +21,18 @@ data_science_urls_list = [
     "https://searchenterpriseai.techtarget.com/definition/data-science",
 ]
 
+block_chain_urls_list = [
+    "https://builtin.com/blockchain"
+]
+
+vr_urls_list = [
+    "https://www.sciencedaily.com/terms/virtual_reality.htm"
+]
+
+dev_ops_urls_list = [
+    "https://www.toptal.com/insights/innovation/what-is-devops"
+]
+
 url = "https://www.brookings.edu/research/how-artificial-intelligence-is-transforming-the-world/"
 
 
@@ -50,25 +62,6 @@ def scrape_articles(request):
                     "url": link
                 }
                 response.append(data)
-            # if index == 1:
-            #     driver.get(key["link"])
-            #     soup = BeautifulSoup(driver.page_source, 'html.parser')
-            #     titleTag = soup.find(name="h1", class_="av-special-heading-tag")
-            #     title = titleTag.contents[0].string + titleTag.contents[1].string + titleTag.contents[2].string
-            #     content = soup.find(name="div", class_="avia_textblock").contents[0]
-            #     print("Content is", content)
-            #     # content = soup.find(name="div", class_="avia_textblock").p.string
-            #     # imageTag = soup.find(name="div", class_="avia-image-overlay-wrap").image
-            #     # print("Image tag is", imageTag)
-            #     # image = imageTag['src']
-            #     data = {
-            #         "id": 1,
-            #         "title": title,
-            #         "content": "content",
-            #         "image": "image",
-            #         "url": key["link"]
-            #     }
-            #     response.append(data)
 
         for index, link in enumerate(cyber_urls_list):
             if index == 0:
@@ -100,6 +93,55 @@ def scrape_articles(request):
                     "title": title,
                     "content": "content",
                     "image": "image.contents[0]['src']",
+                    "url": link
+                }
+                response.append(data)
+
+        for index, link in enumerate(block_chain_urls_list):
+            if index == 0:
+                driver.get(link)
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                title = soup.find(name="div",
+                                  class_="clearfix text-formatted field field--name-field-p-body field--type-text-long field--label-hidden field__item")
+                title_text = title.contents[1].contents[0]
+                content = title.contents[3].contents[0]
+                image = soup.find(name="figure", class_="caption caption-img")
+                data = {
+                    "id": uuid.uuid4(),
+                    "title": title_text,
+                    "content": content,
+                    "image": "https:" + image.contents[0]['src'],
+                    "url": link
+                }
+                response.append(data)
+
+        for index, link in enumerate(vr_urls_list):
+            if index == 0:
+                driver.get(link)
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                title = soup.find(name="h1",
+                                  class_="headline")
+                content = soup.find(name="p", class_="lead")
+                data = {
+                    "id": uuid.uuid4(),
+                    "title": title.contents[0],
+                    "content": content.contents[0],
+                    "image": "",
+                    "url": link
+                }
+                response.append(data)
+
+        for index, link in enumerate(dev_ops_urls_list):
+            if index == 0:
+                driver.get(link)
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                title = soup.find(name="h1", class_="article_bio-title")
+                content = soup.find(name="p", class_="article_excerpt")
+                data = {
+                    "id": uuid.uuid4(),
+                    "title": title.contents[0],
+                    "content": content.contents[0],
+                    "image": "",
                     "url": link
                 }
                 response.append(data)
