@@ -14,6 +14,7 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from .token import TokenAuthMiddlewareStack
 from posts.like.consumer import LikeConsumer
 from chat.consumer import ChatConsumer
+from chat.bot import BotConsumer
 from channels.auth import AuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
@@ -24,6 +25,7 @@ application = ProtocolTypeRouter({
         URLRouter([
             path('ws/chat/<str:sender_username>/<str:receiver_username>/', ChatConsumer.as_asgi()),
             path('ws/like/<str:post_id>/<str:username>/', LikeConsumer.as_asgi()),
+            path('ws/chatbot/<str:name>/', BotConsumer.as_asgi()),
         ]
         )
     )

@@ -34,6 +34,7 @@ def create_test(request):
         response['error'] = "Error occurred while creating test"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
+        print(serializer)
         response['error'] = "Error occurred while creating test"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 

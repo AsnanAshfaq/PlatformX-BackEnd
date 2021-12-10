@@ -1,12 +1,12 @@
 from django.urls import include, path
-from .views import get_user, get_other_user, get_all_users, edit_student, create_student, create_organization, signin, \
+from .views import get_user, get_student_profile, get_all_users, edit_student, create_student, create_organization, signin, \
     signout, activate_user, password_reset, confirm_password_reset, bot_linked_in, user_query
 from .scraper import scrape_articles
 
 urlpatterns = [
-    path('<uuid:id>/', get_other_user),
     path('', get_user),
     path('student/signup/', create_student),
+    path('student/<uuid:id>/', get_student_profile),
     path('student/edit/', edit_student),
     path('organization/signup/', create_organization),
     path('signin/', signin),

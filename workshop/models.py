@@ -20,25 +20,15 @@ class Workshop(models.Model):
     description = models.TextField(blank=True)
     poster = models.ImageField(upload_to=get_workshop_image_path, default='')
     take_away = ArrayField(models.TextField(), default=list)
+    prerequisites = ArrayField(models.TextField(), default=list)
     event_date = models.DateField(default=datetime.date.today)
     start_time = models.TimeField(default=datetime.time, )
-    end_time = models.TimeField(default=datetime.time, )
-    # meeting_link = models.URLField()
     is_paid = models.BooleanField(default=False)
     charges = models.IntegerField(default=0)
     start_url = models.TextField(default="")
     join_url = models.TextField(default="")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
-
-
-class PreRequisite(models.Model):
-    id = models.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE,
-                                 related_name="workshop_prerequisite")
-    title = models.CharField(max_length=40)
-    description = models.TextField(blank=True)
 
 
 class Schedule(models.Model):
@@ -65,7 +55,7 @@ class Speaker(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     workshop = models.ForeignKey(to=Workshop, on_delete=models.CASCADE,
-                                    related_name="speaker")
+                                 related_name="speaker")
     name = models.CharField(max_length=50)
     email = models.EmailField()
     image = models.ImageField(upload_to=get_image_path, default="")

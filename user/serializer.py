@@ -52,22 +52,21 @@ class UserSerializer(serializers.ModelSerializer):
         return OrderedDict([(key, result[key]) for key in result if result[key] is not None])
 
 
-class GetOtherUserSerializer(serializers.ModelSerializer):
-    # follower_count = serializers.SerializerMethodField()
-    student = StudentSerializer(required=False)
-    organization = OrganizationSerializer(required=False)
+class StudentProfileSerializer(serializers.ModelSerializer):
+    profile_image = ProfileImageSerializer(required=False, source="user_profile_image")
 
     class Meta:
         model = User
-        fields = ["id", "student", "organization"]
+        fields = ["first_name", "last_name", "username", "email", "profile_image"]
 
-    def to_representation(self, instance):
-        # ignore any field in User model which has null value
-        result = super(UserSerializer, self).to_representation(instance)
-        return OrderedDict([(key, result[key]) for key in result if result[key] is not None])
 
-    def get_follower_count(self, obj):
-        return 0
+class GetStudentSerializer(serializers.ModelSerializer):
+    student = StudentProfileSerializer(source='uuid')
+
+    class Meta:
+        model = Student
+        fields = ["education", "bio", "lives_in", "skills", "interests", "date_of_birth", "phone_number", "linked_in",
+                  "github", "twitter", "portfolio", "student"]
 
 
 class Users(serializers.ModelSerializer):

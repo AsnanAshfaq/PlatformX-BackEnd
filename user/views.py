@@ -2,7 +2,7 @@ import datetime
 
 from .models import User, Student, Follower, Organization
 from .serializer import UserSerializer, StudentSerializer, Users, FollowerSerializer, EditStudentSerializer, \
-    UserQuerySerializer, GetOtherUserSerializer
+    UserQuerySerializer, GetStudentSerializer
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -34,11 +34,11 @@ def get_user(request):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_other_user(request, id):
+def get_student_profile(request, id):
     response = {}
     try:
-        user = User.objects.get(id=id)
-        user_serializer = GetOtherUserSerializer(user)
+        student_query = Student.objects.get(uuid=id)
+        user_serializer = GetStudentSerializer(student_query)
         return Response(data=user_serializer.data, status=status.HTTP_200_OK)
 
     except:

@@ -34,22 +34,22 @@ def create_workshop(request):
         # get data from request
         data = dict(request.data)
 
-        # for index, path in enumerate(data['poster']):
-        #     poster = path
+        for index, path in enumerate(data['poster']):
+            poster = path
         #
-        # for index, path in enumerate(data['image']):
-        #     image = path
+        for index, path in enumerate(data['image']):
+            image = path
         workshop_data = {
             "user": user,
             "topic": data["topic"][0],
             "description": data["description"][0],
-            # "poster": poster,
+            "poster": poster,
             "take_away": data["take_away"],
+            "prerequisites": data["pre_req"],
             "is_paid": False if data["is_paid"][0] == "false" else True,
             "charges": data["charges"][0],
             "event_date": data["event_date"][0],
             "start_time": data['start_time'][0],
-            "end_time": data["end_time"][0]
         }
 
         serializer = CreateEditWorkshopSerializer(data=workshop_data)
@@ -62,7 +62,7 @@ def create_workshop(request):
                 "workshop": workshop.id,
                 "name": data["name"][0],
                 "email": data["email"][0],
-                # "image": image,
+                "image": image,
                 "about": data["about"][0],
                 "github": data["github"][0],
                 "linked_in": data["linked_in"][0],
@@ -215,6 +215,7 @@ def get_participants(request, id):
         serializer = GetWorkshopParticipantSerializer(participant_query, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
     except:
+        print(serializer)
         response['error'] = "Error while getting workshop participants"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Workshop, Participant, Speaker, PreRequisite
+from .models import Workshop, Participant, Speaker
 from user.models import Organization, ProfileImage, User, Student
 # from django.utils.dates import
 from datetime import datetime
@@ -50,12 +50,6 @@ class SpeakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Speaker
         fields = ["name", "email", "image", "about", "github", "linked_in", "twitter"]
-
-
-class PreRequisiteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PreRequisite
-        fields = ["title", "description"]
 
 
 class CreateEditSpeakerSerializer(serializers.ModelSerializer):
@@ -113,23 +107,16 @@ class AllWorkshopSerializer(serializers.ModelSerializer):
 
 class GetWorkshopSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(source='user')
-
     days_left = serializers.SerializerMethodField()
-
     status = serializers.SerializerMethodField()
-
-    # prerequisites = PreRequisiteSerializer(required=False, many=True, source='workshop_prerequisite')
     is_applied = serializers.SerializerMethodField()
     speaker = SpeakerSerializer(required=False, many=True)
 
     class Meta:
         model = Workshop
-        # fields = ["id", "organization", 'topic', "description", "charges", "is_paid", "status", "days_left",
-        #           "is_applied", "speaker"]
-
         fields = ['id', 'organization', 'topic', "description", "charges", "is_paid", "status", "is_applied",
-                  "take_away", "days_left", 'speaker', 'poster', "event_date", "start_time",
-                  "end_time", 'created_at', 'updated_at']
+                  "take_away", "days_left", 'speaker', "prerequisites", 'poster', "event_date", "start_time",
+                  'created_at', 'updated_at']
 
     def get_days_left(self, obj):
         if (obj.event_date - datetime.now().date()).days > 0:
@@ -149,7 +136,7 @@ class GetWorkshopSerializer(serializers.ModelSerializer):
 
 
 class GetWorkshopParticipantSerializer(serializers.ModelSerializer):
-    student = StudentSerializer(source='id')
+    student = StudentSerializer(source='user')
 
     class Meta:
         model = Participant

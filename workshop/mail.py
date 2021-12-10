@@ -12,7 +12,6 @@ class Mail:
         self.workshop = workshop
 
     def send_mail_to_participant(self, user_mail):
-
         workshop_name = self.get_workshop_name()
         join_url = self.get_workshop_join_url()
         date = self.get_workshop_date()
@@ -20,6 +19,7 @@ class Mail:
         subject = "Workshop Invitation"
         message = f"Thanks for registering for {workshop_name}. Please set up zoom in your device.\n " \
                   f"Meeting join url is {join_url}. Join the meeting link on {date} at {time}\n"
+
         send_mail(
             subject=subject,
             message=message,
@@ -29,28 +29,26 @@ class Mail:
         )
 
     def send_mail_to_speaker(self):
-
         workshop_name = self.get_workshop_name()
         start_url = self.get_workshop_start_url()
         date = self.get_workshop_date()
         time = self.get_workshop_time()
         subject = "Workshop Invitation"
         message = f" Hey Speaker for {workshop_name}. We have schedule a zoom meeting for you\n " \
-                  f"You can start the meeting by going to {start_url}\n" \
-                  f"Join the meeting link on {date} at {time} \n" \
- \
-            # get speaker mail
+                  f"You can start the meeting by going to {start_url}\nJoin the meeting link on {date} at {time} \n"
+        # get speaker mail
         speaker_mail = self.get_speaker_mail()
-        send_mail(
+
+        value = send_mail(
             subject=subject,
             message=message,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[speaker_mail],
             # html_message=msg_html,
         )
+        print("Speaker mail return value is", value)
 
     def send_mail_to_organization(self):
-
         # get participants list
         org_mail = self.get_org_mail()
         workshop_name = self.get_workshop_name()
@@ -60,10 +58,8 @@ class Mail:
 
         subject = "Workshop Invitation"
         message = f" Thank you for hosting workshop on PlatformX {workshop_name}.\n " \
-                  f"We have schedule a zoom meeting for you.You can start the meeting by going to {start_url} \n " \
-                  f"Join the meeting link on {date} at {time}"
-
-        send_mail(
+                  f"You can start the meeting by going to {start_url} \n Join the meeting link on {date} at {time} "
+        value = send_mail(
             subject=subject,
             message=message,
             from_email=settings.EMAIL_HOST_USER,
@@ -71,6 +67,7 @@ class Mail:
             fail_silently=False
             # html_message=msg_html,
         )
+        print("Org mail return value is", value)
 
     def workshop_query(self):
         workshop_query = Workshop.objects.get(id=self.workshop.id)
