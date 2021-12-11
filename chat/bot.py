@@ -4,7 +4,7 @@ from chatterbot.trainers import ListTrainer
 import json
 from chatterbot.trainers import ChatterBotCorpusTrainer
 from chatterbot import comparisons
-
+from channels.exceptions import StopConsumer
 import uuid
 
 
@@ -67,3 +67,15 @@ class BotConsumer(AsyncWebsocketConsumer):
             }
         })
         await self.send(response)
+
+    async def websocket_disconnect(self, close_code):
+        await self.channel_layer.group_add(self.name, self.channel_name)
+
+        await self.send({
+            "type": "websocket.close",
+            "code": close_code
+        })
+
+        print(f'[{self.name}] Disconnected with code {close_code}')
+
+        raise StopConsumer()

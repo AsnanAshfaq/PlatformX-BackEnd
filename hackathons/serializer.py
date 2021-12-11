@@ -55,11 +55,17 @@ class CriteriaSerializer(serializers.ModelSerializer):
         model = JudgingCriteria
         fields = "__all__"
 
+    def create(self, validated_data):
+        return JudgingCriteria.objects.create(**validated_data)
+
 
 class PrizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prize
         fields = "__all__"
+
+    def create(self, validated_data):
+        return Prize.objects.create(**validated_data)
 
 
 class OrganizationSerializer(serializers.ModelSerializer):
@@ -88,19 +94,18 @@ class GetHackathonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hackathon
         fields = ["id", "organization", "title", "tag_line", "description", "theme_tags", "rules", "resource",
-                  "submission_requirement", "background_image", "is_video_required", "start_date_of_hackathon",
-                  "start_time_of_hackathon", "end_date_of_hackathon", "end_time_of_hackathon", "saved_type",
-                  "prizes", "criteria", "participants", "days_left", "status", "is_applied", "created_at", "updated_at"]
+                  "submission_requirement", "background_image", "event_date", "prizes", "criteria",
+                  "participants", "days_left", "status", "is_applied", "created_at", "updated_at"]
 
     def get_participants(self, obj):
         participants_length = Participant.objects.filter(hackathon=obj)
         return len(list(participants_length))
 
     def get_days_left(self, obj):
-        return (obj.end_date_of_hackathon - datetime.now().date()).days
+        return (obj.event_date - datetime.now().date()).days
 
     def get_status(self, obj):
-        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
+        if (obj.event_date - datetime.now().date()).days > 0:
             return "Open"
         return "Ended"
 
@@ -121,8 +126,8 @@ class AllHackathonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Hackathon
-        fields = ["id", "organization", "title", "tag_line", "theme_tags", "start_date_of_hackathon",
-                  "background_image", "end_date_of_hackathon", "total_prize", "is_applied", "participants", "status",
+        fields = ["id", "organization", "title", "tag_line", "theme_tags",
+                  "background_image", "event_date", "total_prize", "is_applied", "participants", "status",
                   "days_left", "created_at", "updated_at"]
 
     def calculate_prize(self, obj):
@@ -137,10 +142,10 @@ class AllHackathonSerializer(serializers.ModelSerializer):
         return len(list(participants_length))
 
     def get_days_left(self, obj):
-        return (obj.end_date_of_hackathon - datetime.now().date()).days
+        return (obj.event_date - datetime.now().date()).days
 
     def get_status(self, obj):
-        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
+        if (obj.event_date - datetime.now().date()).days > 0:
             return "Open"
         return "Ended"
 
@@ -160,7 +165,7 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hackathon
         fields = ["id", "title", "tag_line", "theme_tags", "background_image", "total_prize", "participants",
-                  "days_left", "status", "saved_type", "created_at", "updated_at"]
+                  "days_left", "status", "created_at", "updated_at"]
 
     def get_participants(self, obj):
         participants_length = Participant.objects.filter(hackathon=obj)
@@ -176,12 +181,12 @@ class GetUserHackathonsSerializer(serializers.ModelSerializer):
         return total_prize
 
     def get_days_left(self, obj):
-        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
-            return (obj.end_date_of_hackathon - datetime.now().date()).days
+        if (obj.event_date - datetime.now().date()).days > 0:
+            return (obj.event_date - datetime.now().date()).days
         return 0
 
     def get_status(self, obj):
-        if (obj.end_date_of_hackathon - datetime.now().date()).days > 0:
+        if (obj.event_date - datetime.now().date()).days > 0:
             return "Open"
         return "Ended"
 
@@ -202,10 +207,6 @@ class CreateEditHackathonSerializer(serializers.ModelSerializer):
         instance.tag_line = validated_data.get('tag_line', instance.tag_line)
         instance.description = validated_data.get('description', instance.description)
         instance.theme_tags = validated_data.get('theme_tags', instance.theme_tags)
-        instance.contact_email = validated_data.get('contact_email', instance.contact_email)
-        instance.is_team_required = validated_data.get('is_team_required', instance.is_team_required)
-        instance.min_team_members = validated_data.get('min_team_members', instance.min_team_members)
-        instance.max_team_members = validated_data.get('max_team_members', instance.max_team_members)
         instance.rules = validated_data.get('rules', instance.rules)
         instance.resource = validated_data.get('resource', instance.resource)
         instance.submission_requirement = validated_data.get('submission_requirement', instance.submission_requirement)
@@ -213,23 +214,9 @@ class CreateEditHackathonSerializer(serializers.ModelSerializer):
         # media fields
         instance.logo_image = validated_data.get('logo_image', instance.logo_image)
         instance.background_image = validated_data.get('background_image', instance.background_image)
-        instance.allowed_file_types = validated_data.get('allowed_file_types', instance.allowed_file_types)
-        instance.is_video_required = validated_data.get('is_video_required', instance.is_video_required)
-        instance.promotional_video = validated_data.get('promotional_video', instance.promotional_video)
 
         # schedule fields
-        instance.start_date_of_hackathon = validated_data.get('start_date_of_hackathon',
-                                                              instance.start_date_of_hackathon)
-        instance.start_time_of_hackathon = validated_data.get('start_time_of_hackathon',
-                                                              instance.start_time_of_hackathon)
-        instance.end_date_of_hackathon = validated_data.get('end_date_of_hackathon', instance.end_date_of_hackathon)
-        instance.end_time_of_hackathon = validated_data.get('end_time_of_hackathon', instance.end_time_of_hackathon)
-        instance.result_announcement_date = validated_data.get('result_announcement_date',
-                                                               instance.result_announcement_date)
-        instance.final_reminder = validated_data.get('final_reminder', instance.final_reminder)
-
-        # saved type field
-        instance.saved_type = validated_data.get('saved_type', instance.saved_type)
+        instance.event_date = validated_data.get('event_date', instance.event_date)
 
         instance.save()
         return instance

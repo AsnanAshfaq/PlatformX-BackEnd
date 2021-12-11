@@ -5,8 +5,8 @@ import uuid
 class Chat(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user_first = models.OneToOneField(User, related_name="user_first_chat", on_delete=models.CASCADE, default='')
-    user_second = models.OneToOneField(User, related_name="user_second_chat", on_delete=models.CASCADE, default='')
+    user_first = models.ForeignKey(User, related_name="user_first_chat", on_delete=models.CASCADE, default='')
+    user_second = models.ForeignKey(User, related_name="user_second_chat", on_delete=models.CASCADE, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

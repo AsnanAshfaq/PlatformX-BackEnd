@@ -10,16 +10,6 @@ from django.core.mail import send_mail
 
 # Create your models here.
 class Hackathon(models.Model):
-    # choices
-    SAVED_TYPE_CHOICES = [
-        ('PUBLISHED', 'PUBLISHED'),
-        ('DRAFT', 'DRAFT')
-    ]
-    STATUS = [
-        ('Upcoming', 'Upcoming'),
-        ('Open', 'Open'),
-        ('Ended', 'Ended')
-    ]
 
     def get_background_image_path(self, filename):
         return "hackathon" + "/" + str(self.id) + "/" + "background" + "/" + str(self.title) + "-" + str(filename)
@@ -36,24 +26,18 @@ class Hackathon(models.Model):
     title = models.TextField(default='')
     tag_line = models.TextField(default='')
     description = models.TextField(default='')
-    theme_tags = ArrayField(models.CharField(max_length=25, blank=True), default=list)
+    theme_tags = ArrayField(models.TextField(), default=list)
     rules = ArrayField(models.TextField(), default=list)
     resource = ArrayField(models.TextField(), default=list)
-    submission_requirement = ArrayField(models.TextField(), default=list)
+    submission_requirement = models.TextField(default='')
 
     # media
     logo_image = models.ImageField(upload_to=get_logo_image_path, default='', blank=True)
     background_image = models.ImageField(upload_to=get_background_image_path, default='', blank=True)
-    is_video_required = models.BooleanField(default=False, blank=True)
 
     # schedule
-    start_date_of_hackathon = models.DateField(default=datetime.date.today, blank=True)
-    start_time_of_hackathon = models.TimeField(default=datetime.time, blank=True)
-    end_date_of_hackathon = models.DateField(default=datetime.date.today, blank=True)
-    end_time_of_hackathon = models.TimeField(default=datetime.time, blank=True)
+    event_date = models.DateField(default=datetime.date.today, blank=True)
 
-    saved_type = models.CharField(max_length=10, choices=SAVED_TYPE_CHOICES, default='DRAFT', blank=True)
-    status = models.CharField(max_length=15, choices=STATUS, default='Upcoming', blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
 
@@ -81,8 +65,6 @@ class Participant(models.Model):
     hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
                                   related_name="participant")
     join_date = models.DateTimeField(auto_now_add=True)
-
-
 
 
 class Project(models.Model):

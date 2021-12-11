@@ -92,7 +92,7 @@ def scrape_articles(request):
                     "id": uuid.uuid4(),
                     "title": title,
                     "content": "content",
-                    "image": "image.contents[0]['src']",
+                    "image": "",
                     "url": link
                 }
                 response.append(data)

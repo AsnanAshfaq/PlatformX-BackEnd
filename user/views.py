@@ -97,28 +97,37 @@ def create_student(request):
 @permission_classes([IsAuthenticated])
 def edit_student(request):
     response = {}
-    user = User.objects.get(email=request.user)
-    # check for first name
-    if 'first_name' in request.data:
-        user.first_name = request.data['first_name']
-    # check for last name
-    if 'last_name' in request.data:
-        user.last_name = request.data['last_name']
-    # check if username already exist
-    if 'username' in request.data:
-        username = User.objects.filter(username=request.data['username'])
-        if username:
-            response['user_name'] = "User name already exists"
-            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            user.username = request.data['username']
-    user.save()
-    student_serializer = EditStudentSerializer(request.user, data=request.data, partial=True)
-    if student_serializer.is_valid():
-        response['success'] = "Profile has been updated"
-        return Response(data=response, status=status.HTTP_201_CREATED)
-    response['error'] = "Error occurred while updating profile"
-    return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+    try:
+        user = User.objects.get(email=request.user)
+        # check for first name
+        if 'first_name' in request.data:
+            user.first_name = request.data['first_name']
+        # check for last name
+        if 'last_name' in request.data:
+            user.last_name = request.data['last_name']
+        # check if username already exist
+        if 'username' in request.data:
+            username = User.objects.filter(username=request.data['username'])
+            if username:
+                response['user_name'] = "User name already exists"
+                return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                user.username = request.data['username']
+        user.save()
+        student_query = Student.objects.get(uuid=user.id)
+        student_serializer = EditStudentSerializer(student_query, data=request.data, partial=True)
+        if student_serializer.is_valid():
+            student_serializer.save()
+            print(student_serializer.data)
+            response['success'] = "Profile has been updated"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "Error occurred while updating profile"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+    except:
+        response['error'] = "Error occurred while updating profile"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])

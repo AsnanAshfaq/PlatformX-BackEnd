@@ -64,6 +64,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_id = str(self.message_object.id)
         message = self.message_object.message
         created_at = str(self.message_object.created_at)
+
         # user id is coming from event dict
         response = json.dumps({
             'id': message_id,
@@ -106,6 +107,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_chat_object(self, sender, receiver):
+        print("Sender is", sender, " receiver is", receiver)
         try:
             chat = Chat.objects.get(
                 Q(user_first=sender, user_second=receiver) | Q(user_first=receiver, user_second=sender))

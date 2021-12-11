@@ -97,7 +97,6 @@ class EditStudentSerializer(serializers.ModelSerializer):
         instance.skills = validated_data.get('skills', instance.skills)
         instance.interests = validated_data.get('interests', instance.interests)
         instance.date_of_birth = validated_data.get('date_of_birth', instance.date_of_birth)
-        instance.phone_number = validated_data.get('phone_number', instance.phone_number)
         instance.linked_in = validated_data.get('linked_in', instance.linked_in)
         instance.github = validated_data.get('github', instance.github)
         instance.twitter = validated_data.get('twitter', instance.twitter)
