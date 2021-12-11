@@ -6,6 +6,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.utils import timezone
 from user.models import Student, User
 from django.core.mail import send_mail
+from payment.models import Payment
 
 
 # Create your models here.
@@ -90,3 +91,14 @@ class Project(models.Model):
     video_link = models.URLField(default="", blank=True)
     logo = models.ImageField(upload_to=get_logo_image_path, default='', blank=True)
     file = models.FileField(default="", upload_to=get_file_path)
+
+
+class Subscription(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(
+        'user.Organization', on_delete=models.CASCADE, related_name="subscription", default=1)
+    plan = models.TextField()
+    payment_id = models.ForeignKey(to=Payment, on_delete=models.CASCADE, related_name="payment")
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)

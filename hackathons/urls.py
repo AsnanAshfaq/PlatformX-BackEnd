@@ -2,7 +2,8 @@ from django.urls import path, include
 from .views import get_all_hackathons, get_hackathon, search_hackathon, get_participants, \
     search_participants
 
-from .organization.views import create_hackathon, edit_hackathon, get_organization_hackathons
+from .organization.views import create_hackathon, edit_hackathon, get_organization_hackathons, subscribe, \
+    get_subscription
 from .student.views import register
 
 urlpatterns = [
@@ -16,5 +17,6 @@ urlpatterns = [
     path('hackathon/edit/', edit_hackathon),
     path('hackathon/', get_organization_hackathons),
     path('hackathons/', get_all_hackathons),
-    path('hackathon/subscribe/', get_all_hackathons),
+    path('hackathon/subscribe/', subscribe),
+    path('hackathon/subscriptions/', get_subscription),
 ]

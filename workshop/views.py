@@ -235,7 +235,7 @@ def register_paid_workshop(request, id):
             return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
             # make stripe payment
-            amount = request.data['charges'] * 100 * 0.43
+            amount = int(request.data['charges']) * 100 * 0.43
             description = request.data['description']
 
             stripe_response = stripe.Charge.create(

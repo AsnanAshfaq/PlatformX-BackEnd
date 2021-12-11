@@ -3,11 +3,17 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from user.models import User, Organization
-from hackathons.models import Hackathon
+from hackathons.models import Hackathon, Subscription
 from hackathons.serializer import GetUserHackathonsSerializer, CreateEditHackathonSerializer, PrizeSerializer, \
     CriteriaSerializer
+from .serializer import CreateSubscriptionSerializer, GetSubscriptionsSerializer
 from rest_framework.parsers import FormParser, MultiPartParser
+from payment.serializer import CreatePayment
 from rest_framework.decorators import parser_classes
+import stripe
+from django.conf import settings
+
+stripe.api_key = settings.STRIPE_TEST_SECRET_KEY
 
 
 # create hackathon
@@ -143,3 +149,74 @@ def get_organization_hackathons(request):
     except:
         response["error"] = "Error occurred while getting hackathon."
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+# subscribe to hackathon subscription service
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def subscribe(request):
+    response = {}
+    try:
+
+        user = User.objects.get(email=request.user)
+        org_user = Organization.objects.get(uuid=user.id)
+        amount = int(request.data['charges']) * 100 * 0.43
+        plan = request.data['plan']
+
+        # make stripe payment
+        description = f"Subscribed to hackathon plan {plan}."
+        stripe_response = stripe.Charge.create(
+            amount=int(amount),
+            currency="inr",
+            source="tok_visa",
+            description=description,
+            receipt_email=user.email
+        )
+
+        payment_data = {
+            "user": user.id,
+            "charge_id": stripe_response['id']
+        }
+
+        payment_serializer = CreatePayment(data=payment_data)
+        if payment_serializer.is_valid():
+            # add data in payment
+            payment = payment_serializer.save()
+            subscription_data = {
+                "user": org_user,
+                "plan": plan,
+                "payment_id": payment.id,
+            }
+
+            # add data in subscription
+            subscription_serializer = CreateSubscriptionSerializer(data=subscription_data)
+            if subscription_serializer.is_valid():
+                subscription_serializer.save()
+                response['success'] = "Subscription successful"
+                return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "Subscription error."
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    except:
+        response['error'] = "Subscription error."
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_subscription(request):
+    # getting user subscriptions
+    response = {}
+    try:
+
+        user = User.objects.get(email=request.user)
+        org_user = Organization.objects.get(uuid=user.id)
+        subscription_query = Subscription.objects.filter(user=org_user.uuid)
+        serializer = GetSubscriptionsSerializer(subscription_query, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    except:
+        print(serializer)
+        response['error'] = "Subscription error."
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
