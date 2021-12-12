@@ -19,7 +19,9 @@ def create_profile_image(request):
         request.data['user'] = user.id
         serializer = ProfileImageSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            data = serializer.save()
+            # response['data'] = data.path
+
             response['success'] = "Profile Image has been created"
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:
@@ -45,7 +47,7 @@ def edit_profile_image(request):
         serializer = ProfileImageSerializer(profile_image_query, data=request.data)
         if serializer.is_valid():
             serializer = serializer.save()
-            # print("Serializer is valid", serializer.data)
+            response['path'] = str(serializer.path)
             response['success'] = "Profile Image has been edited"
             return Response(data=response, status=status.HTTP_201_CREATED)
         else:

@@ -20,3 +20,9 @@ class CreateEditProjectSerializer(serializers.ModelSerializer):
         instance.video_link = validated_data.get('video_link', instance.video_link)
         instance.save()
         return instance
+
+
+class GetProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = "__all__"

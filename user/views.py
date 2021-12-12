@@ -14,6 +14,8 @@ from django.conf import settings
 from smtplib import SMTPException
 import pyotp
 import requests
+from posts.models import Post
+from posts.serializer import PostSerializer
 
 
 # Create your views here
@@ -44,6 +46,25 @@ def get_student_profile(request, id):
     except:
         print(user_serializer)
         response["error"] = "No such user exist"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+# get student posts
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_student_posts(request, id):
+    response = {}
+    try:
+
+        # find user id
+        user = User.objects.get(id=id)
+        post_query = Post.objects.filter(user=user).order_by('-created_at')
+        serializer = PostSerializer(post_query, many=True, context={"request": request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+    except:
+        response["error"] = "Couldn't get user posts"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -140,13 +161,17 @@ def create_organization(request):
             response['email_error'] = "Email already exists"
             return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
 
+        print("Trying to create user")
         # create user with given credentials
+        print("Data is", request.data)
         user = User.objects.create_user(email=request.data['email'],
                                         password=request.data['password'],
                                         username=request.data['name'])
         # create organization with given credentials
+
         org = Organization.objects.create(uuid=user, name=request.data['name'], reg_no=request.data['reg_no'],
-                                          location=request.data['location'])
+                                          location=request.data['location'],
+                                          incorporation_date=request.data['incorporation_date'])
         if user and org:
             response['success'] = "Your account has been created successfully"
             return Response(data=response, status=status.HTTP_201_CREATED)

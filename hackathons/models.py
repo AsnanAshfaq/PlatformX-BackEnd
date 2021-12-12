@@ -96,9 +96,9 @@ class Project(models.Model):
 class Subscription(models.Model):
     id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         'user.Organization', on_delete=models.CASCADE, related_name="subscription", default=1)
     plan = models.TextField()
-    payment_id = models.ForeignKey(to=Payment, on_delete=models.CASCADE, related_name="payment")
+    payment_id = models.UUIDField()
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)

@@ -6,9 +6,10 @@ from user.models import User, Organization
 from hackathons.models import Hackathon, Subscription
 from hackathons.serializer import GetUserHackathonsSerializer, CreateEditHackathonSerializer, PrizeSerializer, \
     CriteriaSerializer
-from .serializer import CreateSubscriptionSerializer, GetSubscriptionsSerializer
+from .serializer import CreateSubscriptionSerializer, GetSubscriptionsSerializer, PaymentSerializer
 from rest_framework.parsers import FormParser, MultiPartParser
 from payment.serializer import CreatePayment
+from payment.models import Payment
 from rest_framework.decorators import parser_classes
 import stripe
 from django.conf import settings
@@ -212,11 +213,28 @@ def get_subscription(request):
 
         user = User.objects.get(email=request.user)
         org_user = Organization.objects.get(uuid=user.id)
-        subscription_query = Subscription.objects.filter(user=org_user.uuid)
-        serializer = GetSubscriptionsSerializer(subscription_query, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        # subscription
+
+        subscription_query = Subscription.objects.get(user=org_user)
+        if subscription_query:
+            subscription_serializer = GetSubscriptionsSerializer(subscription_query)
+
+            # get payment
+            payment_query = Payment.objects.get(id=subscription_serializer.data['payment_id'])
+            payment_serializer = PaymentSerializer(payment_query)
+
+            data = {
+                **subscription_serializer.data,
+                **payment_serializer.data,
+                "stripe": stripe.Charge.retrieve(payment_serializer.data['charge_id'])
+            }
+            return Response(data=data, status=status.HTTP_200_OK)
+
+
+    except Subscription.DoesNotExist:
+        response['error'] = "No subscriptions found"
+        return Response(data=response, status=status.HTTP_200_OK)
 
     except:
-        print(serializer)
         response['error'] = "Subscription error."
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)

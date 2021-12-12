@@ -23,4 +23,4 @@ class GetSubscriptionsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = ["id", "user", "plan", "created_at", "updated_at"]
+        fields = ["id", "user", "payment_id", "plan", "created_at", "updated_at"]

@@ -65,8 +65,8 @@ class GetStudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ["education", "bio", "lives_in", "skills", "interests", "date_of_birth", "phone_number", "linked_in",
-                  "github", "twitter", "portfolio", "student"]
+        fields = ["education", "bio", "lives_in", "skills", "interests", "date_of_birth", "linked_in", "github",
+                  "twitter", "portfolio", "student"]
 
 
 class Users(serializers.ModelSerializer):
