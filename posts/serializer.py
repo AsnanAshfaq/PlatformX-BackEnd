@@ -80,6 +80,12 @@ class PostSerializer(serializers.ModelSerializer):
         return ""
 
 
+class GetSavedPost(serializers.ModelSerializer):
+    class Meta:
+        model = SavedPost
+        fields = "__all__"
+
+
 class GetSavedPosts(serializers.ModelSerializer):
     post = serializers.SerializerMethodField()
 
@@ -88,6 +94,10 @@ class GetSavedPosts(serializers.ModelSerializer):
         fields = ['post']
 
     def get_post(self, obj):
-        post_query = Post.objects.filter(user=self.context['request'].user)
-        serializer = PostSerializer(post_query, many=True, context=self.context)
-        return serializer.data
+        query = self.context['query']
+        return_post = []
+        for post in query:
+            post_query = Post.objects.filter(id=post['post_id'])
+            serializer = PostSerializer(post_query, many=True, context=self.context)
+            return_post.append(serializer.data[0])
+        return return_post

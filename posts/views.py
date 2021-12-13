@@ -174,7 +174,7 @@ def get_saved_posts(request):
         user = User.objects.get(email=request.user)
         query = SavedPost.objects.filter(user=user.id)
         if query.exists():
-            serializer = GetSavedPosts(query, context={"request": request})
+            serializer = GetSavedPosts(query, context={"request": request, "query": query.values()})
             return Response(data=serializer.data, status=status.HTTP_200_OK)
         response['error'] = " Error occurred while getting saved posts"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
