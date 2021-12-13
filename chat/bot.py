@@ -32,7 +32,24 @@ class BotConsumer(AsyncWebsocketConsumer):
 
         trainer.train(
             "chatterbot.corpus.english.greetings",
-            "chatterbot.corpus.english.conversations"
+            "chatterbot.corpus.english.conversations",
+            "chatterbot.corpus.english.ai",
+            "chatterbot.corpus.english.botprofile",
+            "chatterbot.corpus.english.computers",
+            "chatterbot.corpus.english.emotion",
+            "chatterbot.corpus.english.food",
+            "chatterbot.corpus.english.gossip",
+            "chatterbot.corpus.english.health",
+            "chatterbot.corpus.english.history",
+            "chatterbot.corpus.english.humor",
+            "chatterbot.corpus.english.literature",
+            "chatterbot.corpus.english.money",
+            "chatterbot.corpus.english.movies",
+            "chatterbot.corpus.english.politics",
+            "chatterbot.corpus.english.psychology",
+            "chatterbot.corpus.english.science",
+            "chatterbot.corpus.english.sports",
+            "chatterbot.corpus.english.trivia",
         )
 
         # accept the connection

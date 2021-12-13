@@ -81,12 +81,10 @@ def scrape_articles(request):
 
         for index, link in enumerate(data_science_urls_list):
             if index == 0:
-                print("Link is", link)
                 driver.get(link)
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
                 title = soup.find(name="h1", class_="definition-title").string
                 content = soup.find(name="section", class_="section definition-section")
-                print("Content is", content.contents)
                 image = soup.find(name="div", class_="image-trim")
                 data = {
                     "id": uuid.uuid4(),
