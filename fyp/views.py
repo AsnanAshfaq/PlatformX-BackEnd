@@ -6,7 +6,9 @@ from rest_framework.decorators import api_view, permission_classes
 from user.models import User, Organization
 from .models import Participant, FYP
 from .serializer import ParticipantSerializer, CreateFYPSerializer, GetAllFYPSerializer, GetFYPSerializer, \
-    GetOrganizationSerializer, CreateParticipantSerializer
+    GetOrganizationSerializer, CreateEditParticipantSerializer
+from .zoom import ZoomAPI
+from .mail import Mail
 
 
 # Create your views here.
@@ -119,7 +121,7 @@ def apply(request, id):
             "user": user.id,
             "fyp": id,
         }
-        serializer = CreateParticipantSerializer(data=data)
+        serializer = CreateEditParticipantSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             response['success'] = "Successfully applied for FYP"
@@ -128,4 +130,36 @@ def apply(request, id):
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
     except:
         response['error'] = "Error occurred while applying for FYP"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+# schedule meeting
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def schedule_meeting(request, id, stdid):
+    response = {}
+    try:
+
+        schedule_time = request.data['date']
+        zoom = ZoomAPI(fyp=id, std_id=stdid, time=schedule_time)
+        participant_query = Participant.objects.get(fyp=id, user=stdid)
+
+        if zoom.create_meeting() == 1:
+            zoom_response = zoom.get_response()
+
+            mail = Mail(data=zoom.get_response, applicant_id=stdid, fyp=id)
+            mail.send_mail_to_applicant(join_url=zoom_response['join_url'], join_time=zoom_response['start_time'])
+            mail.send_mail_to_organization(start_url=zoom_response['start_url'], join_time=zoom_response['start_time'])
+
+
+            participant_query.is_meeting_scheduled = True
+            participant_query.meeting_schedule = schedule_time
+            participant_query.join_url = zoom_response['join_url']
+            participant_query.save()
+            response['success'] = "Interview has been scheduled."
+            return Response(data=response, status=status.HTTP_201_CREATED)
+        response['error'] = "Error occurred while scheduling interview"
+        return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+    except:
+        response['error'] = "Error occurred while scheduling interview"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)

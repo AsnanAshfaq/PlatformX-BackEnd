@@ -86,6 +86,15 @@ class GetSavedPost(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class CreateSavePost(serializers.ModelSerializer):
+    class Meta:
+        model = SavedPost
+        fields = "__all__"
+
+    def create(self, validated_data):
+        return SavedPost.objects.create(**validated_data)
+
+
 class GetSavedPosts(serializers.ModelSerializer):
     post = serializers.SerializerMethodField()
 

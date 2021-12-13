@@ -47,13 +47,24 @@ class CreateFYPSerializer(serializers.ModelSerializer):
         return FYP.objects.create(**validated_data)
 
 
-class CreateParticipantSerializer(serializers.ModelSerializer):
+class CreateEditParticipantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Participant
         fields = "__all__"
 
     def create(self, validated_data):
         return Participant.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        print("Updating participant")
+        instance.user = validated_data.get('user', instance.user)
+        instance.fyp = validated_data.get('fyp', instance.fyp)
+        instance.created_at = validated_data.get('created_at', instance.created_at)
+        instance.updated_at = validated_data.get('updated_at', instance.updated_at)
+        instance.is_meeting_scheduled = validated_data.get('is_meeting_scheduled', instance.is_meeting_scheduled)
+        instance.meeting_schedule = validated_data.get('meeting_schedule', instance.meeting_schedule)
+        instance.meeting_id = validated_data.get('meeting_id', instance.meeting_id)
+        return instance
 
 
 class GetAllFYPSerializer(serializers.ModelSerializer):

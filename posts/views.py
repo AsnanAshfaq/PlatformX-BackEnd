@@ -1,6 +1,6 @@
 import random
 
-from .serializer import (PostSerializer, CommentSerializer, ImageSerializer, GetSavedPosts)
+from .serializer import (PostSerializer, CommentSerializer, ImageSerializer, GetSavedPosts, CreateSavePost)
 from .models import Comment, Post, Image, Share, SavedPost
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, parser_classes
@@ -181,4 +181,38 @@ def get_saved_posts(request):
     except:
 
         response['error'] = " Error occurred while getting saved posts"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['post'])
+@permission_classes([IsAuthenticated])
+def save_post(request, id):
+    response = {}
+
+    try:
+        # check if post is already saved or not
+        user = User.objects.get(email=request.user)
+        query = SavedPost.objects.filter(user=user.id, post=id)
+        if query.exists():
+            response['exists'] = "Post is already saved"
+            return Response(data=response, status=status.HTTP_200_OK)
+
+        data = {
+            "user": user.id,
+            "post": id
+        }
+        serializer = CreateSavePost(data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            response['success'] = "Post has been saved"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "Error occurred while saving post"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+    except:
+
+        response['error'] = "Error occurred while saving post"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

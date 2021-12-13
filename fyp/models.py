@@ -28,3 +28,7 @@ class Participant(models.Model):
     fyp = models.ForeignKey(to=FYP, on_delete=models.CASCADE, related_name="participant")
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
+    is_meeting_scheduled = models.BooleanField(default=False)
+    meeting_schedule = models.DateTimeField(default=date.today)
+    meeting_id = models.IntegerField(default=0)
+    join_url = models.TextField(default="")
