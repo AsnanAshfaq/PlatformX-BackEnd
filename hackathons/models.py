@@ -91,6 +91,33 @@ class Project(models.Model):
     video_link = models.URLField(default="", blank=True)
     logo = models.ImageField(upload_to=get_logo_image_path, default='', blank=True)
     file = models.FileField(default="", upload_to=get_file_path)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+
+class Evaluated(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    project = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name="evaluation", default="")
+    idea = models.IntegerField(default=0)
+    originality = models.IntegerField(default=0)
+    functionality = models.IntegerField(default=0)
+    design = models.IntegerField(default=0)
+    problem = models.IntegerField(default=0)
+    stars = models.IntegerField(default=1)
+    remarks = models.TextField(default="")
+
+
+class Result(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    hackathon = models.ForeignKey(to=Hackathon, on_delete=models.CASCADE,
+                                  related_name="result")
+    first = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name="first", default="")
+    second = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name="second", default="")
+    third = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name="third", default="")
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
 
 class Subscription(models.Model):

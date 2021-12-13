@@ -3,9 +3,10 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import FormParser, MultiPartParser
-from .serializer import CreateEditProjectSerializer, GetProjectSerializer
+from .serializer import CreateEditProjectSerializer, GetProjectSerializer, GetAllProjects, \
+    CreateEditEvaluationSerializer, GetResultSerializer, CreateEditResult
 from user.models import User, Student
-from hackathons.models import Project
+from hackathons.models import Project, Evaluated, Result
 from django.db.models import Q
 
 
@@ -85,6 +86,8 @@ def is_user_project_exists(request, id):
 
         query = Project.objects.get(student=user.id, hackathon=id)
         if query:
+            serializer = GetProjectSerializer(query)
+            response['id'] = serializer.data['id']
             response['success'] = "Getting project data successful"
             return Response(data=response, status=status.HTTP_200_OK)
 
@@ -101,8 +104,7 @@ def get_project(request, id, projectID):
     response = {}
 
     try:
-        user = User.objects.get(email=request.user)
-        query = Project.objects.get(student=user.id, hackathon=id, id=projectID)
+        query = Project.objects.get(hackathon=id, id=projectID)
         if query:
             serializer = GetProjectSerializer(query)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -112,3 +114,99 @@ def get_project(request, id, projectID):
     except:
         response['error'] = "Error occurred while getting your project"
         return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_all_projects(request, id):
+    response = {}
+
+    try:
+        query = Project.objects.filter(hackathon=id)
+        if query.exists():
+            serializer = GetAllProjects(query, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        response['not_found'] = "No projects found"
+        return Response(data=response, status=status.HTTP_200_OK)
+    except:
+        print(serializer)
+        response['error'] = "Error occurred while getting your project"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def evaluate_project(request, id, projectID):
+    response = {}
+
+    try:
+        data = {
+            "project": request.data['id'],
+            "idea": request.data['idea'],
+            "originality": request.data['originality'],
+            "functionality": request.data['functionality'],
+            "design": request.data['design'],
+            "problem": request.data['problem'],
+            "stars": request.data['stars'],
+            "remarks": request.data['remarks']
+        }
+
+        serializer = CreateEditEvaluationSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            response['success'] = "Evaluation Completed"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+
+        response['error'] = "Error occurred while evaluating"
+        return Response(data=response, status=status.HTTP_200_OK)
+
+    except:
+        response['error'] = "Error occurred while evaluating"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_result(request, id):
+    response = {}
+    try:
+        # get data
+        first_query = Project.objects.get(id=request.data['first'])
+        second_query = Project.objects.get(id=request.data['second'])
+        third_query = Project.objects.get(id=request.data['third'])
+        data = {
+            "hackathon": id,
+            "first": first_query.id,
+            "second": second_query.id,
+            "third": third_query.id
+
+        }
+        serializer = CreateEditResult(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            response['success'] = "Result has been poster"
+            return Response(data=response, status=status.HTTP_201_CREATED)
+    except:
+        response['error'] = "Error occurred while creating result"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_result(request, id):
+    response = {}
+
+    try:
+        # get result
+        query = Result.objects.filter(hackathon=id)
+        if query.exists():
+            serializer = GetResultSerializer(query, many=True)
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+        response['not_found'] = "No result found"
+        return Response(data=response, status=status.HTTP_200_OK)
+
+    except:
+        response['error'] = "Error occurred while creating result"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

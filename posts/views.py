@@ -1,7 +1,7 @@
 import random
 
-from .serializer import (PostSerializer, CommentSerializer, ImageSerializer)
-from .models import Comment, Post, Image, Share
+from .serializer import (PostSerializer, CommentSerializer, ImageSerializer, GetSavedPosts)
+from .models import Comment, Post, Image, Share, SavedPost
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
@@ -10,6 +10,7 @@ from rest_framework import status
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.pagination import PageNumberPagination
 from posts.share.serializer import ShareSerializer, GetAllSharesSerializer
+from user.models import User, Student
 from .FCMManager import push_notification
 
 
@@ -162,3 +163,22 @@ def search_post(request):
         post_query = Post.objects.filter(text__search=post_search_string).order_by('-created_at')
         post_serializer = PostSerializer(post_query, many=True, context={"request": request})
         return Response(data=post_serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_saved_posts(request):
+    response = {}
+
+    try:
+        user = User.objects.get(email=request.user)
+        query = SavedPost.objects.filter(user=user.id)
+        if query.exists():
+            serializer = GetSavedPosts(query, context={"request": request})
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        response['error'] = " Error occurred while getting saved posts"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except:
+
+        response['error'] = " Error occurred while getting saved posts"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)

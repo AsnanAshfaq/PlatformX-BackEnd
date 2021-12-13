@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Like, Image, PostVote
+from .models import Post, Like, Image, PostVote, SavedPost
 from user.serializer import UserSerializer, ProfileImageSerializer
 from user.models import User
 from .share.serializer import ShareSerializer
@@ -78,3 +78,16 @@ class PostSerializer(serializers.ModelSerializer):
         if like_query:
             return "Liked"
         return ""
+
+
+class GetSavedPosts(serializers.ModelSerializer):
+    post = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SavedPost
+        fields = ['post']
+
+    def get_post(self, obj):
+        post_query = Post.objects.filter(user=self.context['request'].user)
+        serializer = PostSerializer(post_query, many=True, context=self.context)
+        return serializer.data

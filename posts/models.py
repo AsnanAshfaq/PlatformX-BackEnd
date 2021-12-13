@@ -90,3 +90,12 @@ class Image(models.Model):
 
     def __str__(self):
         return str(self.id) + self.metadata
+
+
+class SavedPost(models.Model):
+    id = models.UUIDField(
+        primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(
+        'user.Student', on_delete=models.CASCADE, default=1)
+    post = models.ForeignKey(
+        Post, on_delete=models.CASCADE, related_name="saved", null=False)

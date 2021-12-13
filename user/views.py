@@ -352,3 +352,4 @@ def user_query(request):
     except:
         response['error'] = "Error occurred while sending query"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
