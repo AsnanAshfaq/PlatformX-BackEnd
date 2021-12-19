@@ -33,8 +33,6 @@ def get_chat_list(request):
         # get chat id's where sender or receiver is current user
         chats = Chat.objects.filter(
             Q(user_first=user_id) | Q(user_second=user_id))
-        print("User id is", user_id)
-        print("Chat query is", chats)
         for chat in chats:
             # get receiver id
             receiver = None
@@ -55,6 +53,46 @@ def get_chat_list(request):
                 "message": message_serializer.data
             }
             response.append(chat)
+        return Response(data=response, status=status.HTTP_200_OK)
+
+    except:
+        response['error'] = "Error occurred while fetching chats"
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_chat(request):
+    response = []
+    try:
+        user_id = User.objects.get(email=request.user).id
+        # get chat id's where sender or receiver is current user
+        chats = Chat.objects.filter(
+            Q(user_first__username__icontains=request.GET['q']) | Q(user_second__username__icontains=request.GET['q']))
+        for chat in chats:
+            # get receiver id
+            receiver = None
+            if chat.user_first.id == user_id:
+                receiver = chat.user_second
+            elif chat.user_second.id == user_id:
+                receiver = chat.user_first
+            # getting receiver data
+            receiver = User.objects.get(email=receiver)
+            user_serializer = UserSerializer(receiver)
+
+            # getting last message
+            message_query = Message.objects.filter(chat_id=chat.id).order_by('-created_at')[0:1]
+            message_serializer = GetChatListMessageSerializer(message_query, many=True)
+            chat = {
+                "id": chat.id,
+                "user": user_serializer.data,
+                "message": message_serializer.data
+            }
+            response.append(chat)
+
+        if len(response) > 0:
+            return Response(data=response, status=status.HTTP_200_OK)
+        response = {'error': "No such chat found"}
         return Response(data=response, status=status.HTTP_200_OK)
 
     except:

@@ -194,10 +194,19 @@ def search_internship(request):
 
     try:
         user_query = dict(request.GET)
+        print("Query is", user_query)
         if "q" in user_query.keys():
             internship_search_string = request.GET['q']
             searching_query = Internship.objects.filter(
                 Q(name__icontains=internship_search_string)).order_by(
+                '-created_at')
+            internship_serializer = GetAllInternshipSerializer(searching_query, many=True, context={"request": request})
+            response += internship_serializer.data
+
+        if "duration" in user_query.keys():
+            internship_search_string = request.GET['duration']
+            searching_query = Internship.objects.filter(
+                Q(duration__icontains=internship_search_string)).order_by(
                 '-created_at')
             internship_serializer = GetAllInternshipSerializer(searching_query, many=True, context={"request": request})
             response += internship_serializer.data
