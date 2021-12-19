@@ -90,13 +90,37 @@ def get_test(request, id):
 # get all submissions of a fyp
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def get_user_submission(request, id):
+    response = {}
+    try:
+
+        user = User.objects.get(email=request.user)
+
+        submission_query = Submission.objects.filter(fyp=id, user=user.id)
+        print("Submission query is", submission_query)
+        if submission_query.exists():
+            serializer = GetAllSubmissionSerializer(submission_query, many=True)
+            print("Submission data is", serializer.data)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        response['not_found'] = "Not any submissions yet"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+    except:
+        response['error'] = "Error while getting Submissions"
+        return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_all_submission(request, id):
     response = {}
     try:
 
         submission_query = Submission.objects.filter(fyp=id)
+        print("Submission query is", submission_query)
         if submission_query.exists():
             serializer = GetAllSubmissionSerializer(submission_query, many=True)
+            print("Submission data is", serializer.data)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
 
         response['not_found'] = "Not any submissions yet"
@@ -135,6 +159,7 @@ def get_student_submission(request, fypID):
         student_query = Student.objects.get(uuid=user.id)
 
         submission_query = Submission.objects.get(fyp=fypID, user=student_query)
+
         if submission_query:
             serializer = GetStudentSubmissionSerializer(submission_query)
             return Response(data=serializer.data, status=status.HTTP_200_OK)

@@ -3,6 +3,8 @@ from .models import Test, Submission
 from user.models import Student, ProfileImage, User
 import requests
 
+sphere_engine_token = "7657e2b0f2f5d802f7a52902373ddf0f"
+
 
 class ProfileImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -51,7 +53,7 @@ class GetAllSubmissionSerializer(serializers.ModelSerializer):
 
     def get_data(self, obj):
         data = {}
-        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token=dc64519a0564fd943e20b09564ac9be5'
+        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token={sphere_engine_token}'
         response = requests.get(url)
         j = response.json()
         data['executing'] = j['executing']
@@ -68,7 +70,7 @@ class GetSubmissionSerializer(serializers.ModelSerializer):
         fields = ["id", "api_submission_id", "data", "student", "created_at"]
 
     def get_data(self, obj):
-        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token=dc64519a0564fd943e20b09564ac9be5'
+        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token={sphere_engine_token}'
         response = requests.get(url)
         j = response.json()
         return j
@@ -82,7 +84,7 @@ class GetStudentSubmissionSerializer(serializers.ModelSerializer):
         fields = ["fyp", "api_submission_id", "data"]
 
     def get_data(self, obj):
-        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token=dc64519a0564fd943e20b09564ac9be5'
+        url = f'https://8d2123f3.compilers.sphere-engine.com/api/v4/submissions/{obj.api_submission_id}?access_token={sphere_engine_token}'
         response = requests.get(url)
         j = response.json()
         return j

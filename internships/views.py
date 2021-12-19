@@ -161,6 +161,7 @@ def schedule_meeting(request, id, stdid):
             # send mail to applicant
             join_time = schedule_time
             mail.send_mail_to_applicant(join_url=zoom_response['join_url'], join_time=join_time)
+            mail.send_mail_to_organization(start_url=zoom_response['start_url'], join_time=join_time)
 
             # adding meeting details to participant model
             # participant_query = Participant.objects.get(internship=id, id=stdid)

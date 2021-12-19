@@ -6,8 +6,8 @@ urlpatterns = [
     path('test/create/', create_test),
     path('test/<uuid:id>/', get_test),
     path('submissions/<uuid:id>/', get_all_submission),
-    path('submission/<uuid:fypID>/<uuid:submissionID>/', get_submission),
     path('submission/<uuid:fypID>/', get_student_submission),
+    path('submission/<uuid:fypID>/<uuid:submissionID>/', get_submission),
     path('submission/', create_submission),
 
 ]

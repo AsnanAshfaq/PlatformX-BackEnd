@@ -16,17 +16,19 @@ class Mail:
         join_url = self.get_workshop_join_url()
         date = self.get_workshop_date()
         time = self.get_workshop_time()
+
         subject = "Workshop Invitation"
         message = f"Thanks for registering for {workshop_name}. Please set up zoom in your device.\n " \
                   f"Meeting join url is {join_url}. Join the meeting link on {date} at {time}\n"
 
-        send_mail(
+        value = send_mail(
             subject=subject,
             message=message,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[user_mail],
             # html_message=msg_html,
         )
+        print("Value is", value)
 
     def send_mail_to_speaker(self):
         workshop_name = self.get_workshop_name()
@@ -46,7 +48,6 @@ class Mail:
             recipient_list=[speaker_mail],
             # html_message=msg_html,
         )
-        print("Speaker mail return value is", value)
 
     def send_mail_to_organization(self):
         # get participants list
@@ -67,7 +68,6 @@ class Mail:
             fail_silently=False
             # html_message=msg_html,
         )
-        print("Org mail return value is", value)
 
     def workshop_query(self):
         workshop_query = Workshop.objects.get(id=self.workshop.id)

@@ -80,14 +80,14 @@ def create_workshop(request):
                 if zoom.create_meeting() == 1:
                     zoom_response = zoom.get_response()
                     # save join url and meeting url in db
+                    # send mail to organization
+                    mail = Mail(workshop=workshop)
                     join_url = zoom_response()['join_url']
                     start_url = zoom_response()['start_url']
 
                     workshop.start_url = start_url
                     workshop.join_url = join_url
                     workshop.save()
-                    # send mail to organization
-                    mail = Mail(workshop=workshop)
 
                     mail.send_mail_to_organization()
                     mail.send_mail_to_speaker()
@@ -231,10 +231,12 @@ def register_paid_workshop(request, id):
         participant_query = Participant.objects.filter(user=user.id, workshop=id)
         # check if user has not participated in the workshop
         if participant_query.exists():
+            print("Already exists")
             response['error'] = "Error occurred while register for workshop"
             return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
             # make stripe payment
+
             amount = int(request.data['charges']) * 100 * 0.43
             description = request.data['description']
 
@@ -254,7 +256,7 @@ def register_paid_workshop(request, id):
             payment_serializer = CreatePayment(data=payment_data)
             if payment_serializer.is_valid():
 
-                payment_serializer.save()
+                # payment_serializer.save()
 
                 # add user as participant to workshop
                 serializer_data = {
@@ -269,7 +271,8 @@ def register_paid_workshop(request, id):
                     serializer.save()
 
                     # send mail to participant
-                    mail = Mail(workshop=id)
+                    workshop = Workshop.objects.get(id=id)
+                    mail = Mail(workshop=workshop)
                     mail.send_mail_to_participant(user_mail=user.email)
                     response['success'] = "Registration successful"
                     return Response(data=response, status=status.HTTP_201_CREATED)
@@ -302,16 +305,17 @@ def register_workshop(request, id):
                 "user": user.id,
                 "workshop": id
             }
+
             serializer = CreateParticipantSerializer(data=serializer_data)
             if serializer.is_valid():
                 serializer.save()
 
                 # send mail to participant
-                mail = Mail(workshop=id)
+                workshop = Workshop.objects.get(id=id)
+                mail = Mail(workshop=workshop)
                 mail.send_mail_to_participant(user_mail=user.email)
                 response['success'] = "Registration successful"
                 return Response(data=response, status=status.HTTP_201_CREATED)
-
         response['error'] = "Error occurred while register for workshop"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
 

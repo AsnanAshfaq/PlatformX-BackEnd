@@ -40,16 +40,22 @@ class Mail:
             # html_message=msg_html,
         )
 
-    def send_mail_to_organization(self):
+    def send_mail_to_organization(self, start_url, join_time):
         msg_html = render_to_string('internship_applicant_interview_mail.html')
 
         # get applicant list
-        applicant_mail = self.get_applicant_mail()
+        org_mail = self.get_org_mail()
+        internship_name = self.get_internship_name()
+
+        subject = "Internship Interview"
+        message = f"Your {internship_name} has been scheduled on zoom so make sure you have downloaded zoom app on your system.\n " \
+                  f"Your Meeting link is {start_url}\n" \
+                  f"Start the meeting link on {join_time} \n"
         send_mail(
-            subject="Internship Interview",
-            message="Here is the message",
+            subject=subject,
+            message=message,
             from_email=settings.EMAIL_HOST_USER,
-            recipient_list=["18asnan@gmail.com"],
+            recipient_list=[org_mail],
             fail_silently=False
             # html_message=msg_html,
         )
@@ -61,6 +67,10 @@ class Mail:
     def get_internship_name(self):
         query = self.query_internship()
         return query.name
+
+    def get_org_mail(self):
+        query = self.query_internship()
+        return query.user.uuid.email
 
     def query_internship(self):
         query = Internship.objects.get(id=self.internship_id)
