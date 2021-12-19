@@ -9,6 +9,7 @@ from .serializer import ParticipantSerializer, CreateFYPSerializer, GetAllFYPSer
     GetOrganizationSerializer, CreateEditParticipantSerializer
 from .zoom import ZoomAPI
 from .mail import Mail
+from django.db.models import Q
 
 
 # Create your views here.
@@ -151,7 +152,6 @@ def schedule_meeting(request, id, stdid):
             mail.send_mail_to_applicant(join_url=zoom_response['join_url'], join_time=zoom_response['start_time'])
             mail.send_mail_to_organization(start_url=zoom_response['start_url'], join_time=zoom_response['start_time'])
 
-
             participant_query.is_meeting_scheduled = True
             participant_query.meeting_schedule = schedule_time
             participant_query.join_url = zoom_response['join_url']
@@ -163,3 +163,48 @@ def schedule_meeting(request, id, stdid):
     except:
         response['error'] = "Error occurred while scheduling interview"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_fyp(request):
+    response = []
+    try:
+
+        user_query = dict(request.GET)
+        if "q" in user_query.keys():
+            fyp_search_string = request.GET['q']
+            searching_query = FYP.objects.filter(
+                Q(name__icontains=fyp_search_string) | Q(description__icontains=fyp_search_string)).order_by(
+                '-created_at')
+            fyp_serializer = GetAllFYPSerializer(searching_query, many=True, context={"request": request})
+            # response.append(fyp_serializer.data)
+            response += fyp_serializer.data
+
+        if "categories" in user_query.keys():
+            print("Filtering for categories")
+            fyp_query = FYP.objects.filter(category__contains=user_query['categories']).order_by(
+                '-created_at')
+            if fyp_query.exists():
+                fyp_serializer = GetAllFYPSerializer(fyp_query, many=True, context={"request": request})
+                # response.append(fyp_serializer.data)
+                response += fyp_serializer.data
+
+        if "technologies" in user_query.keys():
+            fyp_query = FYP.objects.filter(technologies__contains=user_query['technologies']).order_by(
+                '-created_at')
+
+            if fyp_query.exists():
+                print("Tech filter exists", fyp_query)
+                fyp_serializer = GetAllFYPSerializer(fyp_query, many=True, context={"request": request})
+                # response.append(fyp_serializer.data)
+                response += fyp_serializer.data
+
+        if len(response) > 0:  # because we have one empty element
+            return Response(data=response, status=status.HTTP_200_OK)
+        else:
+            response = {'error': "No fyp found."}
+            return Response(data=response, status=status.HTTP_200_OK)
+    except:
+        response = {'error': "Error occurred while searching fyps."}
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)

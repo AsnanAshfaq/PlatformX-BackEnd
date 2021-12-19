@@ -75,9 +75,8 @@ class GetAllFYPSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes",
-                  "team_members", "end_date", "participants", "days_left", "is_applied", "status", "created_at",
-                  "updated_at"]
+        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes", "end_date",
+                  "participants", "days_left", "is_applied", "status", "created_at", "updated_at"]
         model = FYP
 
     def get_participants(self, obj):
@@ -109,7 +108,7 @@ class GetFYPSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes", "team_members",
+        fields = ["id", "organization", "name", "description", "category", "technologies", "outcomes",
                   "end_date", "participants", "is_applied", "days_left", "status", "created_at", "updated_at"]
         model = FYP
 
@@ -140,7 +139,7 @@ class GetOrganizationSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ["id", "name", "description", "category", "technologies", "outcomes", "team_members",
+        fields = ["id", "name", "description", "category", "technologies", "outcomes",
                   "end_date", "participants", "days_left", "status", "created_at", "updated_at"]
         model = FYP
 

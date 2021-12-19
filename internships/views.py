@@ -13,6 +13,7 @@ from .mail import Mail
 from django.core.mail import BadHeaderError
 from smtplib import SMTPException
 from datetime import datetime
+from django.db.models import Q
 
 
 # Create your views here.
@@ -184,3 +185,29 @@ def schedule_meeting(request, id, stdid):
     except:
         response['error'] = "Error occurred while scheduling interview"
         return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_internship(request):
+    response = []
+
+    try:
+        user_query = dict(request.GET)
+        if "q" in user_query.keys():
+            internship_search_string = request.GET['q']
+            searching_query = Internship.objects.filter(
+                Q(name__icontains=internship_search_string)).order_by(
+                '-created_at')
+            internship_serializer = GetAllInternshipSerializer(searching_query, many=True, context={"request": request})
+            response += internship_serializer.data
+
+        if len(response) > 0:
+            return Response(data=response, status=status.HTTP_200_OK)
+        else:
+            response = {'error': "No internship found."}
+            return Response(data=response, status=status.HTTP_200_OK)
+
+    except:
+        response = {'error': "Error occurred while searching fyps."}
+        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
