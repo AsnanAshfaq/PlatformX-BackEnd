@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
@@ -7,7 +6,6 @@ from .models import Message, Chat
 from django.db.models import Q
 from .serializer import GetMessagesSerializer, GetChatListMessageSerializer, UserSerializer
 from user.models import User
-import json
 
 
 @api_view(['GET'])

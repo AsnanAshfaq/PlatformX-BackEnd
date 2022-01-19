@@ -189,6 +189,7 @@ def signin(request):
     response = {}
     email = request.data['email']
     password = request.data['password']
+    print("Email and password is", email, password)
     try:
         try:
             user = User.objects.get(email=email)
@@ -352,4 +353,3 @@ def user_query(request):
     except:
         response['error'] = "Error occurred while sending query"
         return Response(data=response, status=status.HTTP_406_NOT_ACCEPTABLE)
-
